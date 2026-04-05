@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+
+# PyInstaller build artifacts
+build/
+dist/
+*.spec.bak
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Auto-generated runtime config (stores last-used IP/port)
+config.json
+
+# Claude Code session data
+.claude/
+CLAUDE.md
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
