@@ -17,7 +17,6 @@ config.json
 
 # Claude Code session data
 .claude/
-CLAUDE.md
 
 # IDE / OS
 .vscode/

@@ -45,12 +45,12 @@ pip install -r requirements.txt
 python level_sensor_monitor.py
 
 # Run the simulator (no physical sensor required)
-python simulator.py --port 5020          # recommended (no admin rights needed)
+python simulator.py --port 502         # recommended (no admin rights needed)
 python simulator.py --mode sine          # smooth sine wave
 python simulator.py --speed 2.0          # faster animation
 ```
 
-When using the simulator, set IP to `127.0.0.1` and Port to `5020` in the application.
+When using the simulator, set IP to `127.0.0.1` and Port to `502` in the application.
 
 ### Modbus Protocol
 
@@ -131,12 +131,12 @@ pip install -r requirements.txt
 python level_sensor_monitor.py
 
 # Spustenie simulátora (nevyžaduje fyzický snímač)
-python simulator.py --port 5020          # odporúčané (nevyžaduje admin práva)
+python simulator.py --port 502         # odporúčané (nevyžaduje admin práva)
 python simulator.py --mode sine          # plynulá sínus vlna
 python simulator.py --speed 2.0          # rýchlejšia animácia
 ```
 
-Pri použití simulátora nastaviť v aplikácii IP: `127.0.0.1`, Port: `5020`.
+Pri použití simulátora nastaviť v aplikácii IP: `127.0.0.1`, Port: `502`.
 
 ### Modbus protokol
 
