@@ -10,7 +10,30 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: LevelSensorMonitor.exe
+            artifact: dist/LevelSensorMonitor.exe
+
+          - os: ubuntu-latest
+            name: LevelSensorMonitor-linux-x64
+            artifact: dist/LevelSensorMonitor
+
+          - os: ubuntu-24.04-arm
+            name: LevelSensorMonitor-linux-arm64
+            artifact: dist/LevelSensorMonitor
+
+          - os: macos-13
+            name: LevelSensorMonitor-mac-intel
+            artifact: dist/LevelSensorMonitor
+
+          - os: macos-latest
+            name: LevelSensorMonitor-mac-arm64
+            artifact: dist/LevelSensorMonitor
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -21,16 +44,24 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Tkinter (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y python3-tk
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build EXE
+      - name: Build binary
         run: pyinstaller --onefile --windowed --name LevelSensorMonitor level_sensor_monitor.py
+
+      - name: Rename artifact
+        shell: bash
+        run: mv "${{ matrix.artifact }}" "dist/${{ matrix.name }}"
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/LevelSensorMonitor.exe
+          files: dist/${{ matrix.name }}
           generate_release_notes: true

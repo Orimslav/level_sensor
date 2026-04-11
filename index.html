@@ -56,11 +56,27 @@
   .footer a{color:#555;text-decoration:none;}
   .footer a:hover{color:#888;}
 
+  .dl-table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+  .dl-table th{text-align:left;padding:5px 8px;color:#555;font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #2a2a3e;}
+  .dl-table td{padding:7px 8px;border-bottom:1px solid #222;vertical-align:middle;}
+  .dl-table tr:last-child td{border-bottom:none;}
+  .dl-os{display:flex;align-items:center;gap:7px;font-size:13px;color:#ccc;}
+  .dl-os svg{flex-shrink:0;opacity:0.7;}
+  .dl-arch{font-size:11px;color:#666;font-family:monospace;}
+  .dl-note{font-size:11px;color:#666;}
+  .btn-dl{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:4px;font-size:12px;font-weight:500;text-decoration:none;background:#1a2a3a;border:1px solid #2980b9;color:#85B7EB;transition:opacity 0.15s;white-space:nowrap;}
+  .btn-dl:hover{opacity:0.78;}
+
+  .mac-note{background:#1e1a0a;border:1px solid #BA7517;border-radius:6px;padding:12px 14px;font-size:12px;color:#c8a44a;line-height:1.6;margin-top:4px;}
+  .mac-note strong{color:#EF9F27;}
+  .mac-note code{background:#2a1e08;border-radius:3px;padding:1px 5px;font-family:monospace;font-size:11px;color:#e8c06a;}
+
   @media(max-width:520px){
     .info-grid{grid-template-columns:1fr;}
     .btn-row{flex-direction:column;}
     .btn{justify-content:center;}
     .topbar{padding:10px 16px;}
+    .dl-arch,.dl-note{display:none;}
   }
 </style>
 </head>
@@ -95,10 +111,94 @@
   <!-- Download -->
   <div class="card">
     <div class="card-title" data-sk="Stiahnutie" data-en="Download">Stiahnutie</div>
-    <div class="btn-row">
-      <a class="btn btn-primary" href="https://github.com/Orimslav/level_sensor/releases/latest" target="_blank">
+
+    <table class="dl-table">
+      <thead>
+        <tr>
+          <th data-sk="Platforma" data-en="Platform">Platforma</th>
+          <th class="dl-arch" data-sk="Arch" data-en="Arch">Arch</th>
+          <th data-sk="Súbor" data-en="File">Súbor</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dl-os">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#85B7EB"><path d="M0 2.5A1.5 1.5 0 011.5 1h13A1.5 1.5 0 0116 2.5v8a1.5 1.5 0 01-1.5 1.5H9v1h1a.5.5 0 010 1H6a.5.5 0 010-1h1v-1H1.5A1.5 1.5 0 010 10.5v-8zm1.5-.5a.5.5 0 00-.5.5v8a.5.5 0 00.5.5h13a.5.5 0 00.5-.5v-8a.5.5 0 00-.5-.5h-13z"/></svg>
+            Windows
+          </span></td>
+          <td class="dl-arch">x86-64</td>
+          <td><span class="dl-note">LevelSensorMonitor.exe</span></td>
+          <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor.exe">
+            ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
+          </a></td>
+        </tr>
+        <tr>
+          <td><span class="dl-os">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#9FE1CB"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/><path d="M8 3.5a.5.5 0 01.5.5v3.793l2.146 2.147a.5.5 0 01-.707.707l-2.354-2.354A.5.5 0 017.5 8V4a.5.5 0 01.5-.5z"/></svg>
+            Linux
+          </span></td>
+          <td class="dl-arch">x86-64</td>
+          <td><span class="dl-note">LevelSensorMonitor-linux-x64</span></td>
+          <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-linux-x64">
+            ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
+          </a></td>
+        </tr>
+        <tr>
+          <td><span class="dl-os">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="#9FE1CB"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/><path d="M8 3.5a.5.5 0 01.5.5v3.793l2.146 2.147a.5.5 0 01-.707.707l-2.354-2.354A.5.5 0 017.5 8V4a.5.5 0 01.5-.5z"/></svg>
+            Linux
+            <span style="font-size:11px;color:#555;margin-left:2px;" data-sk="(Raspberry Pi)" data-en="(Raspberry Pi)">(Raspberry Pi)</span>
+          </span></td>
+          <td class="dl-arch">ARM64</td>
+          <td><span class="dl-note">LevelSensorMonitor-linux-arm64</span></td>
+          <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-linux-arm64">
+            ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
+          </a></td>
+        </tr>
+        <tr>
+          <td><span class="dl-os">
+            <svg width="14" height="14" viewBox="0 0 814 1000" fill="#c0c0c0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46 790.8 0 663 0 541.8c0-207.9 134.4-318 266.5-318 69.4 0 127.1 45.5 170.9 45.5 41.6 0 106.7-48 186.3-48 30.1 0 110.9 2.6 168.3 87.4zm-137.5-174.7c32.4-38.1 55.7-91.1 55.7-144.1 0-7.4-.6-14.9-1.9-21.3-52.6 2-115.2 34.8-152.8 75.4-29 32.4-56.9 85.4-56.9 139.1 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.3 1.3 13.6 1.3 47.4 0 105.1-31.2 140.4-69.6z"/></svg>
+            macOS
+            <span style="font-size:11px;color:#555;margin-left:2px;">Intel</span>
+          </span></td>
+          <td class="dl-arch">x86-64</td>
+          <td><span class="dl-note">LevelSensorMonitor-mac-intel</span></td>
+          <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-mac-intel">
+            ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
+          </a></td>
+        </tr>
+        <tr>
+          <td><span class="dl-os">
+            <svg width="14" height="14" viewBox="0 0 814 1000" fill="#c0c0c0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46 790.8 0 663 0 541.8c0-207.9 134.4-318 266.5-318 69.4 0 127.1 45.5 170.9 45.5 41.6 0 106.7-48 186.3-48 30.1 0 110.9 2.6 168.3 87.4zm-137.5-174.7c32.4-38.1 55.7-91.1 55.7-144.1 0-7.4-.6-14.9-1.9-21.3-52.6 2-115.2 34.8-152.8 75.4-29 32.4-56.9 85.4-56.9 139.1 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.3 1.3 13.6 1.3 47.4 0 105.1-31.2 140.4-69.6z"/></svg>
+            macOS
+            <span style="font-size:11px;color:#555;margin-left:2px;">Apple Silicon</span>
+          </span></td>
+          <td class="dl-arch">ARM64</td>
+          <td><span class="dl-note">LevelSensorMonitor-mac-arm64</span></td>
+          <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-mac-arm64">
+            ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
+          </a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mac note -->
+    <div class="mac-note">
+      <strong data-sk="macOS — prvé spustenie:" data-en="macOS — first launch:">macOS — prvé spustenie:</strong>
+      <span data-sk=" binárka nie je podpísaná Apple certifikátom, treba odstrániť karanténu:"
+            data-en=" binary is not signed with an Apple certificate, remove quarantine first:">
+        binárka nie je podpísaná Apple certifikátom, treba odstrániť karanténu:
+      </span><br>
+      <code>xattr -d com.apple.quarantine LevelSensorMonitor-mac-*</code><br>
+      <code>chmod +x LevelSensorMonitor-mac-*</code><br>
+      <code>./LevelSensorMonitor-mac-*</code>
+    </div>
+
+    <div class="btn-row" style="margin-top:14px;">
+      <a class="btn btn-secondary" href="https://github.com/Orimslav/level_sensor/releases" target="_blank">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.47 10.78a.75.75 0 001.06 0l3.75-3.75a.75.75 0 00-1.06-1.06L8.75 8.44V2a.75.75 0 00-1.5 0v6.44L4.78 5.97a.75.75 0 00-1.06 1.06l3.75 3.75zM2 12.75a.75.75 0 000 1.5h12a.75.75 0 000-1.5H2z"/></svg>
-        <span data-sk="Stiahnuť aplikáciu (.exe)" data-en="Download application (.exe)">Stiahnuť aplikáciu (.exe)</span>
+        <span data-sk="Všetky verzie (GitHub Releases)" data-en="All versions (GitHub Releases)">Všetky verzie (GitHub Releases)</span>
       </a>
       <a class="btn btn-secondary" href="https://github.com/Orimslav/level_sensor/archive/refs/heads/main.zip">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M9.75 1.5H3.5A1.5 1.5 0 002 3v10a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0014 13V5.75L9.75 1.5zm0 1.5L12.5 5.75H9.75V3zM3.5 13V3h4.75v3.5A.75.75 0 009 7.25h3.5L12.5 13H3.5z"/></svg>
