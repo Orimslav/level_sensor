@@ -20,20 +20,43 @@ Desktop application for monitoring the **MY-136 pressure / level sensor** via Mo
 | Default Port | `502` |
 | Default Slave ID | `1` |
 
-### Requirements
+### Download
+
+Pre-built binaries are available on the [Releases](https://github.com/Orimslav/level_sensor/releases/latest) page:
+
+| Platform | File |
+|----------|------|
+| Windows | `LevelSensorMonitor.exe` |
+| Linux x86-64 | `LevelSensorMonitor-linux-x64` |
+| Linux ARM64 (Raspberry Pi 4/5) | `LevelSensorMonitor-linux-arm64` |
+| macOS Intel | `LevelSensorMonitor-mac-intel` |
+| macOS Apple Silicon (M1/M2/M3) | `LevelSensorMonitor-mac-arm64` |
+
+> **macOS — first launch:** The binary is not signed with an Apple certificate.
+> Remove the quarantine flag before running:
+> ```bash
+> xattr -d com.apple.quarantine LevelSensorMonitor-mac-*
+> chmod +x LevelSensorMonitor-mac-*
+> ./LevelSensorMonitor-mac-*
+> ```
+
+> **Raspberry Pi:** Requires a 64-bit OS (Raspberry Pi OS 64-bit). For 32-bit OS run from source (see below).
+
+### Requirements (run from source)
 
 - Python 3.8+
 - pymodbus >= 3.6.0
-- tkinter (included in standard Python on Windows)
+- tkinter (included in standard Python on Windows/macOS; on Linux: `sudo apt install python3-tk`)
 
-### Installation
+### Installation (run from source)
 
 ```bash
-git clone <repo-url>
-cd Level_Sensor
+git clone https://github.com/Orimslav/level_sensor.git
+cd level_sensor
 
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate        # Linux / macOS
+venv\Scripts\activate           # Windows
 
 pip install -r requirements.txt
 ```
@@ -45,9 +68,9 @@ pip install -r requirements.txt
 python level_sensor_monitor.py
 
 # Run the simulator (no physical sensor required)
-python simulator.py --port 502         # recommended (no admin rights needed)
-python simulator.py --mode sine          # smooth sine wave
-python simulator.py --speed 2.0          # faster animation
+python simulator.py --port 502         # standard Modbus port
+python simulator.py --mode sine        # smooth sine wave
+python simulator.py --speed 2.0        # faster animation
 ```
 
 When using the simulator, set IP to `127.0.0.1` and Port to `502` in the application.
@@ -75,13 +98,6 @@ Function codes: **FC03** read holding registers · **FC06** write single registe
 - **MAX / MIN sliders** — alarm thresholds (default MAX=1800 mm, MIN=200 mm)
 - **Status bar** — IP:port · Slave ID · read count · error count
 
-### Build standalone EXE (Windows)
-
-```bash
-pip install pyinstaller
-pyinstaller --onefile --windowed --name LevelSensorMonitor level_sensor_monitor.py
-```
-
 ### Hardware reference
 
 [MY-136 Modbus Communication Protocol (PDF)](modbus_komunika__n___protokol_sn__ma__e_tlaku_my-136.pdf)
@@ -106,20 +122,43 @@ Desktopová aplikácia na monitorovanie **snímača tlaku / hladiny MY-136** cez
 | Predvolený port | `502` |
 | Predvolené Slave ID | `1` |
 
-### Požiadavky
+### Stiahnutie
+
+Pripravené binárky sú dostupné na stránke [Releases](https://github.com/Orimslav/level_sensor/releases/latest):
+
+| Platforma | Súbor |
+|-----------|-------|
+| Windows | `LevelSensorMonitor.exe` |
+| Linux x86-64 | `LevelSensorMonitor-linux-x64` |
+| Linux ARM64 (Raspberry Pi 4/5) | `LevelSensorMonitor-linux-arm64` |
+| macOS Intel | `LevelSensorMonitor-mac-intel` |
+| macOS Apple Silicon (M1/M2/M3) | `LevelSensorMonitor-mac-arm64` |
+
+> **macOS — prvé spustenie:** Binárka nie je podpísaná Apple certifikátom.
+> Pred spustením odstrániť karanténu:
+> ```bash
+> xattr -d com.apple.quarantine LevelSensorMonitor-mac-*
+> chmod +x LevelSensorMonitor-mac-*
+> ./LevelSensorMonitor-mac-*
+> ```
+
+> **Raspberry Pi:** Vyžaduje 64-bitový OS (Raspberry Pi OS 64-bit). Pre 32-bitový OS spustiť zo zdrojového kódu (viď nižšie).
+
+### Požiadavky (spustenie zo zdrojového kódu)
 
 - Python 3.8+
 - pymodbus >= 3.6.0
-- tkinter (súčasť štandardného Pythonu na Windows)
+- tkinter (súčasť štandardného Pythonu na Windows/macOS; na Linuxe: `sudo apt install python3-tk`)
 
-### Inštalácia
+### Inštalácia (spustenie zo zdrojového kódu)
 
 ```bash
-git clone <repo-url>
-cd Level_Sensor
+git clone https://github.com/Orimslav/level_sensor.git
+cd level_sensor
 
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate        # Linux / macOS
+venv\Scripts\activate           # Windows
 
 pip install -r requirements.txt
 ```
@@ -131,9 +170,9 @@ pip install -r requirements.txt
 python level_sensor_monitor.py
 
 # Spustenie simulátora (nevyžaduje fyzický snímač)
-python simulator.py --port 502         # odporúčané (nevyžaduje admin práva)
-python simulator.py --mode sine          # plynulá sínus vlna
-python simulator.py --speed 2.0          # rýchlejšia animácia
+python simulator.py --port 502         # štandardný Modbus port
+python simulator.py --mode sine        # plynulá sínus vlna
+python simulator.py --speed 2.0        # rýchlejšia animácia
 ```
 
 Pri použití simulátora nastaviť v aplikácii IP: `127.0.0.1`, Port: `502`.
@@ -160,13 +199,6 @@ Funkčné kódy: **FC03** čítanie holding registrov · **FC06** zápis jednéh
 - **Vizualizácia nádrže** — vertikálna nádrž (0–2000 mm), voda červená pri alarme, prerušované čiary limitov
 - **Posuvníky MAX / MIN** — prahové hodnoty alarmu (predvolené MAX=1800 mm, MIN=200 mm)
 - **Stavový riadok** — IP:port · Slave ID · počet čítaní · počet chýb
-
-### Kompilácia EXE (Windows)
-
-```bash
-pip install pyinstaller
-pyinstaller --onefile --windowed --name LevelSensorMonitor level_sensor_monitor.py
-```
 
 ### Dokumentácia hardvéru
 
