@@ -8,8 +8,12 @@ Python GUI application for Modbus TCP pressure/level sensor (MY-136 via RS485-to
 - `level_sensor_monitor.py` — hlavná aplikácia
 - `simulator.py` — testovací Modbus TCP server (demo bez fyzického senzora)
 - `config.json` — automaticky generovaný, ukladá poslednú IP a port
+- `requirements.txt` — `pymodbus>=3.6.0`
 - `venv/` — Python virtual environment
 - `modbus_komunika__n___protokol_sn__ma__e_tlaku_my-136.pdf` — manuál senzora
+- `index.html` — GitHub Pages landing page (SK/EN, download tabuľka, Modbus registre)
+- `level_sensor_interactive_demo.html` — interaktívna schéma zapojenia (GitHub Pages)
+- `.github/workflows/build-release.yml` — GitHub Actions: build binárky pre všetky platformy pri tagu `v*`
 
 ---
 
@@ -72,6 +76,42 @@ python simulator.py --speed 2.0          # rýchlejšia animácia
 **Režim `sine`:** hladká sínus vlna 0↔2000 mm
 
 V aplikácii nastaviť IP: `127.0.0.1`, Port podľa spusteného simulátora.
+
+---
+
+## GitHub Actions — build a release (`build-release.yml`)
+
+Workflow sa spustí pri push tagu `v*` (napr. `v1.1.0`).
+Builduje 4 binárky paralelne (matica jobov):
+
+| Runner | Výstup |
+|--------|--------|
+| `windows-latest` | `LevelSensorMonitor.exe` |
+| `ubuntu-latest` | `LevelSensorMonitor-linux-x64` |
+| `ubuntu-24.04-arm` | `LevelSensorMonitor-linux-arm64` |
+| `macos-latest` | `LevelSensorMonitor-mac-arm64` |
+
+**Poznámka:** `macos-13` (Intel) bol vyradený GitHub Actions — Intel Mac build nie je možný cez GitHub-hosted runners.
+Na Linuxe sa pred buildom inštaluje `python3-tk` cez apt.
+Na macOS sa používa Homebrew Python (`python@3.11 + python-tk@3.11`) — framework build s tkinter.
+Každá platforma má v matici `python_cmd` (`python` pre Windows, `python3.11` pre ostatné).
+`fail-fast: false` — zlyhanie jedného jobu nerušení ostatné.
+Všetky súbory sa nahrávajú do GitHub Release (softprops/action-gh-release).
+
+Postup vydania novej verzie:
+```bash
+git tag v1.x.x
+git push origin v1.x.x
+```
+
+---
+
+## GitHub Pages
+
+- `index.html` — landing page s download tabuľkou, hardware info, Modbus registrami, simulátorom
+- `level_sensor_interactive_demo.html` — interaktívna schéma zapojenia RS485 → Ethernet → PC
+- Obe stránky: tmavý motív, SK/EN prepínač, responzívne (mobile-friendly)
+- Na mobile: header skrýva nadpis a podnadpis (`.header-title`, `.header-sub` — `display:none`)
 
 ---
 

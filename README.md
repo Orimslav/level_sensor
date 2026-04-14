@@ -29,15 +29,16 @@ Pre-built binaries are available on the [Releases](https://github.com/Orimslav/l
 | Windows | `LevelSensorMonitor.exe` |
 | Linux x86-64 | `LevelSensorMonitor-linux-x64` |
 | Linux ARM64 (Raspberry Pi 4/5) | `LevelSensorMonitor-linux-arm64` |
-| macOS Intel | `LevelSensorMonitor-mac-intel` |
-| macOS Apple Silicon (M1/M2/M3) | `LevelSensorMonitor-mac-arm64` |
+| macOS Apple Silicon (M1/M2/M3/M4) | `LevelSensorMonitor-mac-arm64` |
+
+> **macOS Intel:** GitHub Actions no longer provides Intel Mac runners. Intel Mac users can run the app from source (see below).
 
 > **macOS — first launch:** The binary is not signed with an Apple certificate.
 > Remove the quarantine flag before running:
 > ```bash
-> xattr -d com.apple.quarantine LevelSensorMonitor-mac-*
-> chmod +x LevelSensorMonitor-mac-*
-> ./LevelSensorMonitor-mac-*
+> xattr -d com.apple.quarantine LevelSensorMonitor-mac-arm64
+> chmod +x LevelSensorMonitor-mac-arm64
+> ./LevelSensorMonitor-mac-arm64
 > ```
 
 > **Raspberry Pi:** Requires a 64-bit OS (Raspberry Pi OS 64-bit). For 32-bit OS run from source (see below).
@@ -131,15 +132,16 @@ Pripravené binárky sú dostupné na stránke [Releases](https://github.com/Ori
 | Windows | `LevelSensorMonitor.exe` |
 | Linux x86-64 | `LevelSensorMonitor-linux-x64` |
 | Linux ARM64 (Raspberry Pi 4/5) | `LevelSensorMonitor-linux-arm64` |
-| macOS Intel | `LevelSensorMonitor-mac-intel` |
-| macOS Apple Silicon (M1/M2/M3) | `LevelSensorMonitor-mac-arm64` |
+| macOS Apple Silicon (M1/M2/M3/M4) | `LevelSensorMonitor-mac-arm64` |
+
+> **macOS Intel:** GitHub Actions už neposkytuje Intel Mac runnery. Používatelia Intel Macu môžu spustiť aplikáciu zo zdrojového kódu (viď nižšie).
 
 > **macOS — prvé spustenie:** Binárka nie je podpísaná Apple certifikátom.
 > Pred spustením odstrániť karanténu:
 > ```bash
-> xattr -d com.apple.quarantine LevelSensorMonitor-mac-*
-> chmod +x LevelSensorMonitor-mac-*
-> ./LevelSensorMonitor-mac-*
+> xattr -d com.apple.quarantine LevelSensorMonitor-mac-arm64
+> chmod +x LevelSensorMonitor-mac-arm64
+> ./LevelSensorMonitor-mac-arm64
 > ```
 
 > **Raspberry Pi:** Vyžaduje 64-bitový OS (Raspberry Pi OS 64-bit). Pre 32-bitový OS spustiť zo zdrojového kódu (viď nižšie).
