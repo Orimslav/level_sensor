@@ -16,22 +16,27 @@ jobs:
           - os: windows-latest
             name: LevelSensorMonitor.exe
             artifact: dist/LevelSensorMonitor.exe
+            python_cmd: python
 
           - os: ubuntu-latest
             name: LevelSensorMonitor-linux-x64
             artifact: dist/LevelSensorMonitor
+            python_cmd: python3.11
 
           - os: ubuntu-24.04-arm
             name: LevelSensorMonitor-linux-arm64
             artifact: dist/LevelSensorMonitor
+            python_cmd: python3.11
 
           - os: macos-13
             name: LevelSensorMonitor-mac-intel
             artifact: dist/LevelSensorMonitor
+            python_cmd: python3.11
 
           - os: macos-latest
             name: LevelSensorMonitor-mac-arm64
             artifact: dist/LevelSensorMonitor
+            python_cmd: python3.11
 
     runs-on: ${{ matrix.os }}
 
@@ -39,10 +44,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python (Windows / Linux)
+        if: "!startsWith(matrix.os, 'macos')"
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Set up Python + Tkinter (macOS — Homebrew framework build)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          brew install python@3.11 python-tk@3.11
+          echo "$(brew --prefix python@3.11)/bin" >> $GITHUB_PATH
 
       - name: Install Tkinter (Linux)
         if: startsWith(matrix.os, 'ubuntu')
@@ -50,11 +62,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install pyinstaller
+          ${{ matrix.python_cmd }} -m pip install -r requirements.txt
+          ${{ matrix.python_cmd }} -m pip install pyinstaller
 
       - name: Build binary
-        run: pyinstaller --onefile --windowed --name LevelSensorMonitor level_sensor_monitor.py
+        run: ${{ matrix.python_cmd }} -m PyInstaller --onefile --windowed --name LevelSensorMonitor level_sensor_monitor.py
 
       - name: Rename artifact
         shell: bash
