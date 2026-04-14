@@ -11,6 +11,7 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -70,7 +71,10 @@ jobs:
 
       - name: Rename artifact
         shell: bash
-        run: mv "${{ matrix.artifact }}" "dist/${{ matrix.name }}"
+        run: |
+          if [ "${{ matrix.artifact }}" != "dist/${{ matrix.name }}" ]; then
+            mv "${{ matrix.artifact }}" "dist/${{ matrix.name }}"
+          fi
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
