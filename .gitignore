@@ -4,6 +4,7 @@ venv/
 # PyInstaller build artifacts
 build/
 dist/
+*.spec
 *.spec.bak
 
 # Python cache
@@ -14,6 +15,10 @@ __pycache__/
 
 # Auto-generated runtime config (stores last-used IP/port)
 config.json
+
+# Auto-generated runtime logs (level history + connection events)
+history.csv
+events.log
 
 # Claude Code session data
 .claude/

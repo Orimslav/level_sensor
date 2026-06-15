@@ -22,6 +22,13 @@ import sys
 import threading
 import time
 
+# Konzola na Windows (cp1250) by inak padla na Unicode znakoch (█ ░ á) pri
+# presmerovanom výstupe — prepneme stdout na UTF-8 s náhradou neznámych znakov.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 try:
     from pymodbus.datastore import (ModbusDeviceContext,
                                     ModbusSequentialDataBlock,

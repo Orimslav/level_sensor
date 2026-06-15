@@ -7,8 +7,10 @@ Python GUI application for Modbus TCP pressure/level sensor (MY-136 via RS485-to
 ### Files
 - `level_sensor_monitor.py` — hlavná aplikácia
 - `simulator.py` — testovací Modbus TCP server (demo bez fyzického senzora)
-- `config.json` — automaticky generovaný, ukladá poslednú IP a port
-- `requirements.txt` — `pymodbus>=3.6.0`
+- `config.json` — automaticky generovaný, ukladá poslednú IP a port + e-mail nastavenia (kľúč `mail`)
+- `history.csv` — automaticky generovaný, priebežný záznam nameranej hodnoty (timestamp, value, unit)
+- `events.log` — automaticky generovaný, log udalostí spojenia (CONNECTED / DISCONNECTED / CONNECT_FAILED / COMM_ERROR / RECOVERED)
+- `requirements.txt` — `pymodbus>=3.6.0`, `pystray>=0.19.5`, `Pillow>=10.0.0`
 - `venv/` — Python virtual environment
 - `modbus_komunika__n___protokol_sn__ma__e_tlaku_my-136.pdf` — manuál senzora
 - `index.html` — GitHub Pages landing page (SK/EN, download tabuľka, Modbus registre)
@@ -22,6 +24,8 @@ Python GUI application for Modbus TCP pressure/level sensor (MY-136 via RS485-to
 Modbus TCP, IP configurable, port 502, Slave ID 1
 
 IP a port sa ukladajú do `config.json` pri každom úspešnom pripojení a načítavajú pri štarte.
+
+**Umiestnenie generovaných súborov (`config.json`, `history.csv`, `events.log`):** `_data_dir()` zvolí prvý zapisovateľný priečinok — vo frozen `.exe` vedľa spustiteľného súboru (NIE `_MEIPASS`, ktorý sa pri každom štarte maže — preto sa predtým nastavenia nepamätali), so zálohou v `~/.my136_level_sensor/`. V dev režime vedľa zdrojáku. Výsledok je cachovaný v `_DATA_DIR_CACHE`.
 
 ---
 
@@ -51,14 +55,56 @@ IP a port sa ukladajú do `config.json` pri každom úspešnom pripojení a nač
 - Prerušované čiary na nádrži zobrazujú aktuálnu polohu limitov
 - Status bar: IP:port, Slave ID, počet čítaní, počet chýb
 - Prepínač jazyka SK/EN
+- Tlačidlá **História** a **Log spojenia** (sekcia Pripojenie) — otvárajú samostatné okná (`Toplevel`)
+
+### História hladiny (samostatné okno)
+- Trend kreslený natívne na `tk.Canvas` (`_redraw_history`) — žiadna externá závislosť (vedome bez matplotlib kvôli veľkosti binárky)
+- Kruhový buffer `self.history` (`deque`, `HISTORY_MAXLEN=18000` bodov ≈ 5 h pri 1 s / 1 h pri 200 ms), záznam `(datetime, real_value, unit_idx)` pri každom úspešnom pollingu (`_record_history`)
+- Y os auto-škáluje na min/max dát (+8 % padding), X os = poradie bodov, časové popisy prvý/posledný bod
+- **Výber rozsahu** (combobox): `HISTORY_SPAN_SECONDS = [60, 300, 900, 1800, 3600, 10800, None]` (None=Všetko), default 1 h. Filter je **podľa časových pečiatok** (`timedelta`), nie podľa počtu bodov → presný bez ohľadu na interval. `_span_label` / `_refresh_span_combo` / `_on_span_change`. `hist_points_label` ukazuje `zobrazené / celkom`.
+- **Okno roztiahnuteľné myšou** (`resizable(True, True)`, `minsize(420,280)`); plátno `fill+expand`, `<Configure>` → prekreslenie podľa skutočnej veľkosti (`winfo_width/height`, fallback `cget`)
+- **Downsampling** pri kreslení — max ~1 bod na pixel šírky (rýchle kreslenie aj pri tisíckach bodov)
+- Priebežný zápis do `history.csv` (hlavička sa píše raz, `_csv_header_done`) — CSV drží **všetko** bez limitu, na rozdiel od bufferu v pamäti
+- Tlačidlá: **Vymazať** (len pamäť, CSV ostáva), **Export CSV…** (`filedialog`, snapshot bufferu)
+
+### E-mailové notifikácie (`_send_email`, dialóg `_open_mail_window`)
+- Tlačidlo **E-mail** v sekcii Pripojenie otvára dialóg s SMTP nastaveniami (host, port, TLS/STARTTLS, login, heslo, odosielateľ, príjemcovia oddelení čiarkou, prah výpadku v s) + tlačidlá **Test** a **Uložiť**
+- Nastavenia v `config.json` pod kľúčom `mail` (`_default_mail_cfg`); **heslo je plaintext** (zámer — interný nástroj). `_on_connected` merguje ip/port do `self._cfg` (neprepisuje `mail`).
+- Odosielanie cez `smtplib` v samostatnom vlákne (`_send_email_async` → `_send_email`); viac príjemcov, STARTTLS, login voliteľný (prázdny = bez auth). Žiadna nová modbus-súvisiaca závislosť.
+- **Spúšťače** (1 mail na epizódu, vrátane „obnovené"):
+  - *Výpadok komunikácie* > `comm_down_sec` (default 60 s) — kontrola v `_handle_comm_error` (volá sa pri každom zlyhanom pollingu, takže prah sa prekročí); `_comm_error_since`, `_comm_down_emailed`. Obnovenie maile v `_update_display` pri prechode error→ok.
+  - *Hladina mimo MIN/MAX* — `_check_level_alarm` z `_update_display`; `_alarm_active` drží stav. Alarm len pre mmH₂O (kde `_in_alarm` dáva zmysel).
+
+### Beh na pozadí — systémová tray ikona
+- `pystray` + `Pillow` (`PIL`), import je **voliteľný** (`_HAS_TRAY`): ak zlyhá (napr. Linux bez tray podpory), `WM_DELETE_WINDOW` → `_real_quit` (normálne ukončenie).
+- S tray: zavretie okna (X) → `_hide_to_tray` (`root.withdraw()` + jednorazová `notify`), monitorovanie/maily bežia ďalej. Tray menu: **Zobraziť** (default, ľavý klik) / **Ukončiť**.
+- Tray ikona beží vo vlastnom vlákne (`icon.run()`); callbacky z tray vlákna sa cez `root.after(0, …)` presúvajú na hlavné vlákno (tkinter nie je thread-safe). `_real_quit` zastaví polling, zatvorí klienta, `icon.stop()` a `root.destroy()`.
+- Ikona sa generuje za behu cez PIL (`_make_tray_image` — nádrž s vodou), netreba bundlovať obrázok.
+
+### Log spojenia (samostatné okno)
+- `self.events` (`deque`, `EVENTS_MAXLEN=1000`), zobrazené v `tk.Text` s farebnými tagmi podľa typu (`EVENT_COLORS`)
+- Typy: `EV_CONNECTED`, `EV_DISCONNECTED`, `EV_CONNECT_FAILED`, `EV_COMM_ERROR`, `EV_RECOVERED`
+- `_log_event` pridá do bufferu, zapíše do `events.log` (jazykovo nezávislé kódy) a aktualizuje otvorené okno
+- **Detekcia prechodov:** `self._comm_state` (`None`/`ok`/`error`) — `COMM_ERROR` a `outage_count++` sa zaznamenajú IBA pri prechode ok→error (nie každý zlyhaný poll, inak by sa log zaplavoval); `RECOVERED` pri error→ok v `_update_display`
+- Počítadlo výpadkov `outage_count` zobrazené v hlavičke okna
 
 ### Dôležité implementačné detaily
 - `_initial_sync_done` flag — combobox sa syncuje so senzorom **iba raz** po prvom úspešnom čítaní; pri každom ďalšom pollingu sa **neprepísuje** (inak by blokoval zápis používateľa)
 - Zobrazovaná hodnota: `real_value = raw_value / DECIMAL_DIVISORS[decimal_idx]`, formát `f".{decimal_idx}f"`
-- Zápis do registrov beží v samostatnom vlákne; polling a write vlákno zdieľajú klienta — lock chráni iba získanie referencie, nie samotnú komunikáciu (known limitation)
+- `_apply_language` pri prepnutí jazyka obnoví aj otvorené okná História/Log (titulky + obsah)
+
+### Komunikačný model — jedno I/O vlákno (stabilita čítania)
+Modbus socket **výhradne vlastní jediné vlákno** `_io_loop` (spustené v `_start_refresh`, zastavené cez `_stop_event` v `_stop_refresh`). Tým sú **všetky transakcie serializované** — nikdy nebežia dve naraz, žiadne prelínanie rámcov.
+- **Čítanie** `_read_once` raz za cyklus; počas intervalu čakania vlákno promptne vyberá zápisy z `self._write_queue` a vykoná ich cez `_do_write`.
+- **Zápis**: `_write_register` (UI) iba vloží `(address, value, label)` do fronty — nespúšťa vlastné vlákno.
+- Klient má `retries=3` (pymodbus zopakuje prechodnú chybu); po chybe `_read_once` skúsi `client.connect()` pre ďalší cyklus.
+- Interval sa do vlákna prenáša cez plain `self._refresh_ms` (aktualizovaný `trace` na `refresh_var` v hlavnom vlákne) — **tkinter sa z I/O vlákna nevolá** (nie je thread-safe).
+- `_stop_refresh` nastaví event a `join(timeout=2.0)`; `_disconnect`/`_on_close` najprv zastavia vlákno, až potom zatvoria klienta.
+- **Pozn.:** starý model (nové vlákno na každý poll cez `root.after` + samostatné write vlákno zdieľajúce socket) bol nahradený — spôsoboval kopenie vlákien a kolízie rámcov pri pomalom senzore/timeoutoch.
 
 ### Chýba (TODO)
 - Register 5: zero offset — nie je implementovaný v GUI
+- `history.csv` rastie neobmedzene (~3 MB/deň pri 1 s intervale) — bez rotácie (zámerne jednoduché)
 
 ---
 
@@ -74,6 +120,8 @@ python simulator.py --speed 2.0          # rýchlejšia animácia
 
 **Režim `scenario` (default):** stúpanie 0→2000 mm → MAX alarm → klesanie → MIN alarm → opakovanie
 **Režim `sine`:** hladká sínus vlna 0↔2000 mm
+
+Na začiatku prepína `sys.stdout` na UTF-8 (`errors="replace"`) — inak konzolová animácia (znaky █ ░ á) padá na `UnicodeEncodeError` pri presmerovanom výstupe alebo cp1250 konzole.
 
 V aplikácii nastaviť IP: `127.0.0.1`, Port podľa spusteného simulátora.
 

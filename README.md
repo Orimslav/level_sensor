@@ -47,6 +47,7 @@ Pre-built binaries are available on the [Releases](https://github.com/Orimslav/l
 
 - Python 3.8+
 - pymodbus >= 3.6.0
+- pystray >= 0.19.5, Pillow >= 10.0.0 (system tray / background operation)
 - tkinter (included in standard Python on Windows/macOS; on Linux: `sudo apt install python3-tk`)
 
 ### Installation (run from source)
@@ -99,6 +100,15 @@ Function codes: **FC03** read holding registers · **FC06** write single registe
 - **MAX / MIN sliders** — alarm thresholds (default MAX=1800 mm, MIN=200 mm)
 - **Status bar** — IP:port · Slave ID · read count · error count
 
+### Features
+
+- **Remembers last IP & port** — saved to `config.json` next to the app
+- **Stable reading** — a single dedicated I/O thread serializes all Modbus transactions (no frame collisions); client retries + auto-reconnect
+- **Level history** — native trend graph with selectable time range, resizable window, continuous logging to `history.csv` and CSV export
+- **Connection log** — timestamped events (connect / disconnect / comm. error / recovered) with an outage counter, saved to `events.log`
+- **E-mail alerts** — on communication outage longer than the threshold (default 60 s) and on MIN/MAX range breach, including recovery notifications (SMTP settings in the app, stored in `config.json`)
+- **Background operation** — closing the window minimizes the app to the system tray (Show / Quit); monitoring and alerts keep running
+
 ### Hardware reference
 
 [MY-136 Modbus Communication Protocol (PDF)](modbus_komunika__n___protokol_sn__ma__e_tlaku_my-136.pdf)
@@ -150,6 +160,7 @@ Pripravené binárky sú dostupné na stránke [Releases](https://github.com/Ori
 
 - Python 3.8+
 - pymodbus >= 3.6.0
+- pystray >= 0.19.5, Pillow >= 10.0.0 (systémová lišta / beh na pozadí)
 - tkinter (súčasť štandardného Pythonu na Windows/macOS; na Linuxe: `sudo apt install python3-tk`)
 
 ### Inštalácia (spustenie zo zdrojového kódu)
@@ -201,6 +212,15 @@ Funkčné kódy: **FC03** čítanie holding registrov · **FC06** zápis jednéh
 - **Vizualizácia nádrže** — vertikálna nádrž (0–2000 mm), voda červená pri alarme, prerušované čiary limitov
 - **Posuvníky MAX / MIN** — prahové hodnoty alarmu (predvolené MAX=1800 mm, MIN=200 mm)
 - **Stavový riadok** — IP:port · Slave ID · počet čítaní · počet chýb
+
+### Funkcie
+
+- **Zapamätá si poslednú IP a port** — uložené do `config.json` vedľa aplikácie
+- **Stabilné čítanie** — jedno vyhradené I/O vlákno serializuje všetky Modbus transakcie (žiadne kolízie rámcov); opakovanie + auto-reconnect klienta
+- **História hladiny** — natívny graf trendu s voliteľným časovým rozsahom, roztiahnuteľné okno, priebežný záznam do `history.csv` a export do CSV
+- **Log spojenia** — udalosti s časovou pečiatkou (pripojenie / odpojenie / chyba komunikácie / obnovené) s počítadlom výpadkov, ukladané do `events.log`
+- **E-mailové notifikácie** — pri výpadku komunikácie dlhšom ako prah (predvolene 60 s) a pri prekročení MIN/MAX rozsahu, vrátane notifikácií o obnovení (SMTP nastavenia v aplikácii, uložené v `config.json`)
+- **Beh na pozadí** — zatvorenie okna schová aplikáciu do systémovej lišty (Zobraziť / Ukončiť); monitorovanie a notifikácie bežia ďalej
 
 ### Dokumentácia hardvéru
 

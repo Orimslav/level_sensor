@@ -84,7 +84,9 @@
 
 <div class="topbar">
   <div class="topbar-logo">
-    <img src="img/orimslav_logo.png" alt="Orimslav logo">
+    <a href="https://orimslav.github.io/" target="_blank" rel="noopener" title="Orimslav">
+      <img src="img/orimslav_logo.png" alt="Orimslav logo" style="cursor:pointer;">
+    </a>
     <span>level_sensor</span>
   </div>
   <div class="lang-switcher">
@@ -105,7 +107,7 @@
        data-en="Desktop application for monitoring the MY-136 pressure / level sensor<br>via Modbus TCP (RS485 sensor → RS485-to-Ethernet converter)">
       Desktopová aplikácia na monitorovanie snímača tlaku / hladiny MY-136<br>cez Modbus TCP (RS485 snímač → prevodník RS485-to-Ethernet)
     </p>
-    <span class="badge">Python 3 · pymodbus &gt;= 3.6.0 · tkinter</span>
+    <span class="badge">Python 3 · pymodbus &gt;= 3.6.0 · tkinter · pystray</span>
   </div>
 
   <!-- Download -->
@@ -197,6 +199,27 @@
         <span data-sk="Interaktívne demo" data-en="Interactive demo">Interaktívne demo</span>
       </a>
     </div>
+  </div>
+
+  <!-- Features -->
+  <div class="card">
+    <div class="card-title" data-sk="Funkcie" data-en="Features">Funkcie</div>
+    <ul style="margin:0;padding-left:20px;line-height:1.9;">
+      <li data-sk="Zapamätá si poslednú IP a port (uložené vedľa aplikácie)"
+          data-en="Remembers the last IP &amp; port (stored next to the app)">Zapamätá si poslednú IP a port (uložené vedľa aplikácie)</li>
+      <li data-sk="Stabilné čítanie cez jedno I/O vlákno (serializované Modbus transakcie, auto-reconnect)"
+          data-en="Stable reading via a single I/O thread (serialized Modbus transactions, auto-reconnect)">Stabilné čítanie cez jedno I/O vlákno (serializované Modbus transakcie, auto-reconnect)</li>
+      <li data-sk="Vizualizácia nádrže s MIN/MAX alarmami a prepínačom SK/EN"
+          data-en="Tank visualization with MIN/MAX alarms and SK/EN switch">Vizualizácia nádrže s MIN/MAX alarmami a prepínačom SK/EN</li>
+      <li data-sk="História hladiny — graf s voliteľným rozsahom, roztiahnuteľné okno, priebežný záznam a export do CSV"
+          data-en="Level history — graph with selectable range, resizable window, continuous logging &amp; CSV export">História hladiny — graf s voliteľným rozsahom, roztiahnuteľné okno, priebežný záznam a export do CSV</li>
+      <li data-sk="Log spojenia s počítadlom výpadkov (ukladané do events.log)"
+          data-en="Connection log with outage counter (saved to events.log)">Log spojenia s počítadlom výpadkov (ukladané do events.log)</li>
+      <li data-sk="E-mailové notifikácie — pri výpadku komunikácie &gt; 1 min a pri prekročení MIN/MAX rozsahu (vrátane obnovenia)"
+          data-en="E-mail alerts — on communication outage &gt; 1 min and on MIN/MAX range breach (including recovery)">E-mailové notifikácie — pri výpadku komunikácie &gt; 1 min a pri prekročení MIN/MAX rozsahu (vrátane obnovenia)</li>
+      <li data-sk="Beh na pozadí cez systémovú tray ikonu (Zobraziť / Ukončiť)"
+          data-en="Background operation via system tray icon (Show / Quit)">Beh na pozadí cez systémovú tray ikonu (Zobraziť / Ukončiť)</li>
+    </ul>
   </div>
 
   <!-- Hardware -->
