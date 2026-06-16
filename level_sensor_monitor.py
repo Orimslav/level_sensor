@@ -992,10 +992,13 @@ class LevelSensorApp:
             self.error_count += 1
             msg = str(exc)
             self.root.after(0, lambda m=msg: self._handle_comm_error(m))
-            # Pokus o obnovenie spojenia pre ďalší cyklus (na tom istom klientovi)
+            # Vynúť ČISTÝ reconnect pre ďalší cyklus. Po výpadku (napr. reštart
+            # prevodníka) pymodbus nechá client.connected = True, hoci je socket
+            # mŕtvy — preto sa na ňom čítanie nikdy neobnoví. close()+connect()
+            # zhodí starý socket a otvorí nový; čerstvé spojenie číta správne.
             try:
-                if not getattr(client, "connected", True):
-                    client.connect()
+                client.close()
+                client.connect()
             except Exception:
                 pass
 

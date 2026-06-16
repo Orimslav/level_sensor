@@ -99,7 +99,7 @@ IP a port sa ukladajú do `config.json` pri každom úspešnom pripojení a nač
 Modbus socket **výhradne vlastní jediné vlákno** `_io_loop` (spustené v `_start_refresh`, zastavené cez `_stop_event` v `_stop_refresh`). Tým sú **všetky transakcie serializované** — nikdy nebežia dve naraz, žiadne prelínanie rámcov.
 - **Čítanie** `_read_once` raz za cyklus; počas intervalu čakania vlákno promptne vyberá zápisy z `self._write_queue` a vykoná ich cez `_do_write`.
 - **Zápis**: `_write_register` (UI) iba vloží `(address, value, label)` do fronty — nespúšťa vlastné vlákno.
-- Klient má `retries=3` (pymodbus zopakuje prechodnú chybu); po chybe `_read_once` skúsi `client.connect()` pre ďalší cyklus.
+- Klient má `retries=3` (pymodbus zopakuje prechodnú chybu); po chybe `_read_once` vynúti **čistý reconnect** `client.close()` + `client.connect()`. **Pozor:** nestačí podmienka `if not client.connected` — pymodbus po timeoute/výpadku (napr. reštart prevodníka) nechá `connected=True` aj keď je socket mŕtvy, takže by sa čítanie nikdy neobnovilo a indikátor by ostal natrvalo „Chyba" (reads zamrznuté, errs stúpa). `close()+connect()` zhodí mŕtvy socket a otvorí nový.
 - Interval sa do vlákna prenáša cez plain `self._refresh_ms` (aktualizovaný `trace` na `refresh_var` v hlavnom vlákne) — **tkinter sa z I/O vlákna nevolá** (nie je thread-safe).
 - `_stop_refresh` nastaví event a `join(timeout=2.0)`; `_disconnect`/`_on_close` najprv zastavia vlákno, až potom zatvoria klienta.
 - **Pozn.:** starý model (nové vlákno na každý poll cez `root.after` + samostatné write vlákno zdieľajúce socket) bol nahradený — spôsoboval kopenie vlákien a kolízie rámcov pri pomalom senzore/timeoutoch.
