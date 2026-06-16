@@ -20,6 +20,8 @@ Desktop application for monitoring the **MY-136 pressure / level sensor** via Mo
 | Default Port | `502` |
 | Default Slave ID | `1` |
 
+> **Sharing the device with other Modbus masters (SCADA/PLC):** if more than one master polls the same sensor through the converter, set the converter to a **Modbus gateway / Multi-Host Polling** mode — **not** transparent / "Simple Protocol Conversion". In transparent mode the converter mirrors all bus traffic to every TCP client, the transaction IDs collide and the app shows a permanent "Error". Multi-Host Polling serializes the requests and routes each response to the correct master, so multiple masters coexist cleanly. (On the USR-DR134: *Working Mode → Modbus Multi Host Polling*.)
+
 ### Download
 
 Pre-built binaries are available on the [Releases](https://github.com/Orimslav/level_sensor/releases/latest) page:
@@ -103,7 +105,7 @@ Function codes: **FC03** read holding registers · **FC06** write single registe
 ### Features
 
 - **Remembers last IP & port** — saved to `config.json` next to the app
-- **Stable reading** — a single dedicated I/O thread serializes all Modbus transactions (no frame collisions); client retries + auto-reconnect
+- **Stable reading** — a single dedicated I/O thread serializes all Modbus transactions (no frame collisions); client retries + **automatic recovery after an outage** (forces a clean socket reconnect, e.g. after a converter restart, and the status returns to green on its own)
 - **Level history** — native trend graph with selectable time range, resizable window, continuous logging to `history.csv` and CSV export; **hover the cursor over the graph** to read the exact date, time and value of the nearest point
 - **Connection log** — timestamped events (connect / disconnect / comm. error / recovered) with an outage counter, saved to `events.log`
 - **E-mail alerts** — on communication outage longer than the threshold (default 60 s) and on MIN/MAX range breach, including recovery notifications (SMTP settings in the app, stored in `config.json`)
@@ -132,6 +134,8 @@ Desktopová aplikácia na monitorovanie **snímača tlaku / hladiny MY-136** cez
 | Predvolená IP | `192.168.1.1` |
 | Predvolený port | `502` |
 | Predvolené Slave ID | `1` |
+
+> **Zdieľanie zariadenia s inými Modbus masteroch (SCADA/PLC):** ak ten istý snímač cez prevodník poluje viac masterov, nastav prevodník do režimu **Modbus gateway / Multi-Host Polling** — **nie** transparentný / „Simple Protocol Conversion". V transparentnom režime prevodník zrkadlí celú premávku zbernice každému TCP klientovi, transaction ID sa zrazia a aplikácia trvalo zobrazuje „Chyba". Multi-Host Polling žiadosti zoradí a každú odpoveď pošle správnemu masterovi, takže viac masterov koexistuje čisto. (Na USR-DR134: *Working Mode → Modbus Multi Host Polling*.)
 
 ### Stiahnutie
 
@@ -216,7 +220,7 @@ Funkčné kódy: **FC03** čítanie holding registrov · **FC06** zápis jednéh
 ### Funkcie
 
 - **Zapamätá si poslednú IP a port** — uložené do `config.json` vedľa aplikácie
-- **Stabilné čítanie** — jedno vyhradené I/O vlákno serializuje všetky Modbus transakcie (žiadne kolízie rámcov); opakovanie + auto-reconnect klienta
+- **Stabilné čítanie** — jedno vyhradené I/O vlákno serializuje všetky Modbus transakcie (žiadne kolízie rámcov); opakovanie + **automatické zotavenie po výpadku** (vynúti čistý reconnect socketu, napr. po reštarte prevodníka, a indikátor sa sám vráti na zelenú)
 - **História hladiny** — natívny graf trendu s voliteľným časovým rozsahom, roztiahnuteľné okno, priebežný záznam do `history.csv` a export do CSV; **pri prejdení kurzorom po grafe** sa zobrazí presný dátum, čas a hodnota najbližšieho bodu
 - **Log spojenia** — udalosti s časovou pečiatkou (pripojenie / odpojenie / chyba komunikácie / obnovené) s počítadlom výpadkov, ukladané do `events.log`
 - **E-mailové notifikácie** — pri výpadku komunikácie dlhšom ako prah (predvolene 60 s) a pri prekročení MIN/MAX rozsahu, vrátane notifikácií o obnovení (SMTP nastavenia v aplikácii, uložené v `config.json`)
