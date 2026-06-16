@@ -3,6 +3,7 @@ MY-136 Pressure / Level Sensor Monitor
 Modbus TCP — RS485-to-Ethernet converter
 """
 
+import bisect
 import csv
 import json
 import queue
@@ -37,8 +38,9 @@ DEFAULT_REFRESH_MS = 1000
 HISTORY_MAXLEN = 18000  # body trendu v pamäti (~5 h pri 1 s, ~1 h pri 200 ms)
 EVENTS_MAXLEN  = 1000   # záznamy udalostí v pamäti
 
-# Voliteľné rozsahy grafu histórie (sekundy; None = všetko v pamäti)
-HISTORY_SPAN_SECONDS = [60, 300, 900, 1800, 3600, 10800, None]
+# Voliteľné rozsahy grafu histórie (sekundy). Dáta sa čerpajú z history.csv
+# (drží všetko), takže aj dlhé rozsahy sa zobrazia úplne bez ohľadu na buffer.
+HISTORY_SPAN_SECONDS = [900, 3600, 28800, 43200, 86400, 604800]
 HISTORY_SPAN_DEFAULT = 3600   # predvolene 1 h
 
 
@@ -183,6 +185,8 @@ STRINGS = {
         "hist_points":      "Points",
         "lbl_range":        "Range:",
         "span_all":         "All",
+        "span_day":         "day",
+        "span_week":        "week",
         "ev_time":          "Time",
         "ev_event":         "Event",
         "ev_detail":        "Detail",
@@ -274,6 +278,8 @@ STRINGS = {
         "hist_points":      "Bodov",
         "lbl_range":        "Rozsah:",
         "span_all":         "Všetko",
+        "span_day":         "deň",
+        "span_week":        "týždeň",
         "ev_time":          "Čas",
         "ev_event":         "Udalosť",
         "ev_detail":        "Detail",
@@ -392,6 +398,8 @@ class LevelSensorApp:
         self.history_canvas = None
         self.events_text = None
         self.history_span_sec = HISTORY_SPAN_DEFAULT   # rozsah grafu (s); None = všetko
+        self._hist_view = []           # (datetime, value, unit_idx) pre graf — čerpané z CSV
+        self._hist_plot = None         # geometria posledného vykreslenia (pre hover kurzor)
         self.span_cb = None
         self.range_label = None
 
@@ -1015,6 +1023,8 @@ class LevelSensorApp:
                         raw_value, real_value, unit_idx, decimal_idx):
         # Detekcia obnovenia po výpadku komunikácie
         if self._comm_state == "error":
+            # Vizuálny indikátor späť na zelený "Pripojený" (inak ostane svietiť "Chyba")
+            self._set_status(self._t("status_conn"), COLOR_CONNECTED)
             self._log_event(EV_RECOVERED, "")
             if self._comm_down_emailed:   # mail pošli iba ak sme o výpadku notifikovali
                 t = STRINGS[self.lang]
@@ -1155,6 +1165,13 @@ class LevelSensorApp:
         except Exception:
             pass
         if self.history_win is not None and self.history_win.winfo_exists():
+            # Doplň živý bod do pohľadu grafu a orež čelo na aktuálny rozsah
+            self._hist_view.append((now, real_value, unit_idx))
+            if self.history_span_sec is not None:
+                cutoff = now - timedelta(seconds=self.history_span_sec)
+                i = bisect.bisect_left(self._hist_view, (cutoff,))
+                if i > 0:
+                    del self._hist_view[:i]
             self._redraw_history()
 
     # ------------------------------------------------------------------
@@ -1192,6 +1209,10 @@ class LevelSensorApp:
                                         bg=COLOR_PANEL, highlightthickness=0)
         self.history_canvas.pack(fill="both", expand=True, padx=12, pady=(0, 6))
         self.history_canvas.bind("<Configure>", lambda e: self._redraw_history())
+        # Hover: zobraz dátum/čas/hodnotu najbližšieho bodu pri pohybe kurzorom
+        self.history_canvas.bind("<Motion>", self._on_history_motion)
+        self.history_canvas.bind("<Leave>",
+                                 lambda e: self.history_canvas.delete("hover"))
 
         btn_row = tk.Frame(win, bg=COLOR_BG)
         btn_row.pack(fill="x", padx=12, pady=(0, 12))
@@ -1206,11 +1227,18 @@ class LevelSensorApp:
                   command=self._clear_history).pack(side="right", padx=(4, 0))
 
         win.protocol("WM_DELETE_WINDOW", self._close_history_window)
+        self._load_history_view()
         self._redraw_history()
 
     def _span_label(self, sec):
         if sec is None:
             return self._t("span_all")
+        if sec % 604800 == 0:
+            n = sec // 604800
+            return f"{n} {self._t('span_week')}"
+        if sec % 86400 == 0:
+            n = sec // 86400
+            return f"{n} {self._t('span_day')}"
         if sec < 3600:
             return f"{sec // 60} min"
         return f"{sec // 3600} h"
@@ -1230,7 +1258,42 @@ class LevelSensorApp:
         idx = self.span_cb.current()
         if 0 <= idx < len(HISTORY_SPAN_SECONDS):
             self.history_span_sec = HISTORY_SPAN_SECONDS[idx]
+        self._load_history_view()
         self._redraw_history()
+
+    def _load_history_view(self):
+        """Načíta body pre aktuálny rozsah grafu z history.csv (drží celú históriu,
+        na rozdiel od pamäťového bufferu). Volá sa pri otvorení okna a zmene rozsahu;
+        živé body sa potom dopĺňajú v _record_history."""
+        span = self.history_span_sec
+        cutoff = None
+        if span is not None:
+            cutoff = datetime.now() - timedelta(seconds=span)
+        pts = []
+        try:
+            with open(_history_path(), "r", encoding="utf-8", newline="") as f:
+                r = csv.reader(f)
+                next(r, None)   # hlavička
+                for row in r:
+                    if len(row) < 3:
+                        continue
+                    try:
+                        ts = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        continue
+                    if cutoff is not None and ts < cutoff:
+                        continue
+                    try:
+                        val = float(row[1])
+                    except ValueError:
+                        continue
+                    unit_idx = PRESSURE_UNITS.index(row[2]) if row[2] in PRESSURE_UNITS else 0
+                    pts.append((ts, val, unit_idx))
+        except FileNotFoundError:
+            pts = list(self.history)
+        except Exception:
+            pts = list(self.history)
+        self._hist_view = pts
 
     def _close_history_window(self):
         if self.history_win is not None:
@@ -1245,6 +1308,7 @@ class LevelSensorApp:
         if c is None or not c.winfo_exists():
             return
         c.delete("all")
+        self._hist_plot = None   # zneplatné, kým sa nedokreslí (vetvy s return)
         # Skutočná veľkosť plátna (po roztiahnutí okna); fallback na cget
         W = c.winfo_width()
         H = c.winfo_height()
@@ -1260,28 +1324,34 @@ class LevelSensorApp:
                            outline=COLOR_TANK_WALL, width=1)
 
         t = STRINGS[self.lang]
-        data = list(self.history)
-        total = len(data)
+        view = self._hist_view
+        total = len(view)
 
-        # Filter podľa zvoleného rozsahu (presne podľa časových pečiatok)
-        if self.history_span_sec is not None and data:
-            cutoff = data[-1][0] - timedelta(seconds=self.history_span_sec)
-            data = [p for p in data if p[0] >= cutoff]
+        # Začiatok rozsahu (presne podľa časových pečiatok) — bisect na zoradenom
+        # zozname je O(log n), takže redraw je rýchly aj pri státisícoch bodov.
+        start = 0
+        if self.history_span_sec is not None and view:
+            cutoff = view[-1][0] - timedelta(seconds=self.history_span_sec)
+            start = bisect.bisect_left(view, (cutoff,))
+        n_in_span = total - start
 
         if hasattr(self, "hist_points_label") and self.hist_points_label.winfo_exists():
             self.hist_points_label.config(
-                text=f"{t['hist_points']}: {len(data)} / {total}")
+                text=f"{t['hist_points']}: {n_in_span} / {total}")
 
-        if not data:
+        if n_in_span <= 0:
             c.create_text((x0 + x1) // 2, (y0 + y1) // 2, text=t["no_data"],
                           fill=COLOR_TEXT, font=("Segoe UI", 11))
             return
 
-        # Downsampling — nanajvýš ~1 bod na pixel šírky (rýchle kreslenie)
+        # Downsampling — nanajvýš ~1 bod na pixel šírky; vzorkujeme priamo cez
+        # indexy bez kopírovania celého rozsahu (rýchle aj pri tisíckach bodov)
         max_pts = max(2, int(x1 - x0))
-        if len(data) > max_pts:
-            step = len(data) / max_pts
-            data = [data[min(int(i * step), len(data) - 1)] for i in range(max_pts)]
+        if n_in_span > max_pts:
+            step = n_in_span / max_pts
+            data = [view[start + min(int(i * step), n_in_span - 1)] for i in range(max_pts)]
+        else:
+            data = view[start:]
 
         values = [v for (_, v, _) in data]
         vmin, vmax = min(values), max(values)
@@ -1330,9 +1400,67 @@ class LevelSensorApp:
         c.create_text(x1, y1 + 4, text=data[-1][0].strftime("%H:%M:%S"),
                       fill="#90a4ae", font=("Segoe UI", 7), anchor="ne")
 
+        # Geometria pre hover kurzor (najbližší bod podľa X)
+        self._hist_plot = {
+            "x0": x0, "y0": y0, "x1": x1, "y1": y1,
+            "vmin": vmin, "span": span,
+            "values": values, "data": data, "unit_str": unit_str,
+        }
+
+    def _on_history_motion(self, event):
+        c = self.history_canvas
+        if c is None or not c.winfo_exists():
+            return
+        p = self._hist_plot
+        if not p:
+            return
+        x0, y0, x1, y1 = p["x0"], p["y0"], p["x1"], p["y1"]
+        if not (x0 <= event.x <= x1 and y0 <= event.y <= y1):
+            c.delete("hover")
+            return
+        values = p["values"]
+        n = len(values)
+        if n == 0:
+            return
+        if n == 1:
+            i = 0
+            px = x0
+        else:
+            i = int(round((event.x - x0) / (x1 - x0) * (n - 1)))
+            i = max(0, min(n - 1, i))
+            px = x0 + (x1 - x0) * i / (n - 1)
+        v = values[i]
+        py = y1 - (v - p["vmin"]) / p["span"] * (y1 - y0)
+        ts = p["data"][i][0]
+        unit_str = p["unit_str"]
+
+        c.delete("hover")
+        c.create_line(px, y0, px, y1, fill="#ffffff", width=1, dash=(2, 2),
+                      tags="hover")
+        c.create_oval(px - 4, py - 4, px + 4, py + 4, outline="#ffffff",
+                      width=1, fill=COLOR_VALUE_TEXT, tags="hover")
+
+        label = (f"{ts.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                 f"{v:.4g} {unit_str}")
+        if px > (x0 + x1) / 2:      # popis vľavo od kurzora pri pravom okraji
+            tx, anchor = px - 8, "ne"
+        else:
+            tx, anchor = px + 8, "nw"
+        txt_id = c.create_text(tx, y0 + 6, text=label, fill="#ffffff",
+                               font=("Segoe UI", 8), anchor=anchor,
+                               justify="left", tags="hover")
+        bb = c.bbox(txt_id)
+        if bb:
+            c.create_rectangle(bb[0] - 3, bb[1] - 2, bb[2] + 3, bb[3] + 2,
+                               fill="#263238", outline=COLOR_TANK_WALL,
+                               tags="hover")
+            c.tag_raise(txt_id)
+
     def _clear_history(self):
-        # Vymaže iba živý pohľad v pamäti; CSV súbor na disku ostáva.
+        # Vymaže iba živý pohľad v pamäti; CSV súbor na disku ostáva
+        # (po opätovnom otvorení / zmene rozsahu sa graf znova načíta z CSV).
         self.history.clear()
+        self._hist_view = []
         self._redraw_history()
 
     def _export_csv(self):

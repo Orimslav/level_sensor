@@ -104,7 +104,7 @@ Function codes: **FC03** read holding registers · **FC06** write single registe
 
 - **Remembers last IP & port** — saved to `config.json` next to the app
 - **Stable reading** — a single dedicated I/O thread serializes all Modbus transactions (no frame collisions); client retries + auto-reconnect
-- **Level history** — native trend graph with selectable time range, resizable window, continuous logging to `history.csv` and CSV export
+- **Level history** — native trend graph with selectable time range, resizable window, continuous logging to `history.csv` and CSV export; **hover the cursor over the graph** to read the exact date, time and value of the nearest point
 - **Connection log** — timestamped events (connect / disconnect / comm. error / recovered) with an outage counter, saved to `events.log`
 - **E-mail alerts** — on communication outage longer than the threshold (default 60 s) and on MIN/MAX range breach, including recovery notifications (SMTP settings in the app, stored in `config.json`)
 - **Background operation** — closing the window minimizes the app to the system tray (Show / Quit); monitoring and alerts keep running
@@ -217,7 +217,7 @@ Funkčné kódy: **FC03** čítanie holding registrov · **FC06** zápis jednéh
 
 - **Zapamätá si poslednú IP a port** — uložené do `config.json` vedľa aplikácie
 - **Stabilné čítanie** — jedno vyhradené I/O vlákno serializuje všetky Modbus transakcie (žiadne kolízie rámcov); opakovanie + auto-reconnect klienta
-- **História hladiny** — natívny graf trendu s voliteľným časovým rozsahom, roztiahnuteľné okno, priebežný záznam do `history.csv` a export do CSV
+- **História hladiny** — natívny graf trendu s voliteľným časovým rozsahom, roztiahnuteľné okno, priebežný záznam do `history.csv` a export do CSV; **pri prejdení kurzorom po grafe** sa zobrazí presný dátum, čas a hodnota najbližšieho bodu
 - **Log spojenia** — udalosti s časovou pečiatkou (pripojenie / odpojenie / chyba komunikácie / obnovené) s počítadlom výpadkov, ukladané do `events.log`
 - **E-mailové notifikácie** — pri výpadku komunikácie dlhšom ako prah (predvolene 60 s) a pri prekročení MIN/MAX rozsahu, vrátane notifikácií o obnovení (SMTP nastavenia v aplikácii, uložené v `config.json`)
 - **Beh na pozadí** — zatvorenie okna schová aplikáciu do systémovej lišty (Zobraziť / Ukončiť); monitorovanie a notifikácie bežia ďalej
