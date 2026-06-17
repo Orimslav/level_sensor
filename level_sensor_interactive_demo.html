@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="img/logo.ico"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 :root {
   --bg:      #0d0d10;
@@ -32,51 +32,47 @@
   --red:     #E24B4A;
   --red2:    #A32D2D;
   --accent:  #1D9E75;
+  --kofi:    #29ABE0;
+  --bh:      rgba(29,158,117,0.4);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   min-height: 100vh;
 }
+body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(29,158,117,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(29,158,117,0.02) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+.container, header, nav, footer { position: relative; z-index: 1; }
 a { color: var(--teal3); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* ── HEADER ── */
-header {
-  background: var(--bg2);
+/* ── NAV (rovnaký sticky nav ako Waveshare demo) ── */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+nav {
   border-bottom: 1px solid var(--border);
-  padding: 18px 32px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  padding: 13px 0;
+  position: sticky; top: 0;
+  background: rgba(13,13,16,0.95);
+  backdrop-filter: blur(14px);
+  z-index: 100;
 }
-.logo-box {
-  width: 36px; height: 36px;
-  background: var(--teal2);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 600; font-size: 13px;
-  color: var(--teal3);
-  flex-shrink: 0;
-}
-.header-title { font-size: 15px; font-weight: 600; color: var(--text); }
-.header-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.header-badges { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-.badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px; padding: 3px 8px;
-  border-radius: 4px; border: 1px solid;
-}
-.badge-teal  { background: #0a2e22; border-color: var(--teal2); color: var(--teal3); }
-.badge-blue  { background: #0a1e35; border-color: var(--blue2); color: var(--blue3); }
-.badge-amber { background: #2a1e08; border-color: var(--amber2); color: var(--amber); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.nav-logo:hover { text-decoration: none; }
+.nav-logo img.logo { height: 38px; width: auto; object-fit: contain; }
+.nav-brand { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); }
+.nav-right { display: flex; align-items: center; gap: 18px; }
+.nav-links { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.nav-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .2s; }
+.nav-links a:hover { color: var(--text); text-decoration: none; }
+.nav-kofi { display: inline-flex; align-items: center; gap: 6px; color: var(--kofi)!important; font-weight: 600; border: 1px solid rgba(41,171,224,0.35); border-radius: 6px; padding: 5px 11px; transition: border-color .2s, background .2s; }
+.nav-kofi:hover { border-color: var(--kofi); background: rgba(41,171,224,0.08); color: var(--kofi)!important; }
+.nav-kofi img { height: 16px; width: auto; }
 
 /* ── LAYOUT ── */
-.container { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+.container { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
 .section-title {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px; font-weight: 600;
@@ -152,14 +148,6 @@ input[type=range]::-webkit-slider-thumb {
 }
 @media (max-width: 800px) {
   .demo-grid { grid-template-columns: 1fr; }
-  header {
-    padding: 12px 16px;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .header-title { display: none; }
-  .header-sub   { display: none; }
-  .header-badges { margin-left: auto; gap: 6px; flex-wrap: wrap; }
 }
 
 .panel {
@@ -222,7 +210,7 @@ input[type=range]::-webkit-slider-thumb {
 .app-btn {
   padding: 3px 10px; border-radius: 4px;
   font-size: 11px; cursor: pointer; border: 1px solid;
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 .app-btn-red { background: #2a0f0f; border-color: #7a2020; color: #f09595; }
 .app-body { display: grid; grid-template-columns: 1fr 1fr; }
@@ -351,51 +339,55 @@ footer {
   background: var(--bg2);
 }
 
-/* ── LANGUAGE SWITCHER ── */
-.lang-switcher { display: flex; gap: 6px; margin-left: 16px; }
-.lang-btn {
-  background: none; border: 1.5px solid #444; border-radius: 4px;
-  cursor: pointer; padding: 3px 7px;
-  display: flex; align-items: center; gap: 5px;
-  font-size: 11px; color: #888;
-  transition: border-color 0.15s, color 0.15s;
+/* ── LANGUAGE SWITCHER (rovnaký ako Waveshare) ── */
+.lang-sw { display: flex; gap: 4px; align-items: center; }
+.lb {
+  background: transparent; border: 1px solid var(--border); border-radius: 5px;
+  padding: 3px 5px; cursor: pointer;
+  transition: border-color .18s, transform .15s, opacity .18s;
+  opacity: 0.55; display: flex; align-items: center;
 }
-.lang-btn:hover { border-color: #777; color: #ccc; }
-.lang-btn.active { border-color: var(--teal); color: #ccc; }
-.lang-btn img { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; }
+.lb:hover { opacity: 0.85; border-color: rgba(255,255,255,0.2); }
+.lb.active { opacity: 1; border-color: var(--teal); transform: scale(1.08); }
+.lb img { width: 24px; height: 16px; object-fit: cover; border-radius: 2px; display: block; }
+
+a:focus-visible, button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 4px; }
+@media (max-width: 600px) {
+  .wrap { padding: 0 18px; }
+  .nav-inner { flex-wrap: wrap; gap: 9px; }
+  .nav-right { width: 100%; justify-content: space-between; gap: 12px; }
+}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-  <a href="index.html" style="display:flex;align-items:center;gap:16px;text-decoration:none;">
-    <img src="img/orimslav_logo.png" alt="Orimslav" style="height:32px;width:auto;margin-right:4px;opacity:1;transition:opacity 0.15s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">
-    <div class="logo-box">M136</div>
-    <div>
-      <div class="header-title"
-           data-sk="MY-136 Monitor hladiny / tlaku"
-           data-en="MY-136 Level / Pressure Sensor Monitor">MY-136 Monitor hladiny / tlaku</div>
-      <div class="header-sub"
-           data-sk="Modbus TCP · RS485 → Ethernet · Interaktívna schéma zapojenia"
-           data-en="Modbus TCP · RS485 → Ethernet · Interactive Wiring Diagram">Modbus TCP · RS485 → Ethernet · Interaktívna schéma zapojenia</div>
-    </div>
+<!-- NAV (rovnaký sticky nav ako Waveshare demo) -->
+<nav>
+<div class="wrap nav-inner">
+  <a class="nav-logo" href="index.html">
+    <img class="logo" src="img/orimslav_logo.png" alt="Orimslav logo">
+    <span class="nav-brand">level_sensor</span>
   </a>
-  <div class="header-badges">
-    <a href="index.html" class="badge badge-teal" style="text-decoration:none;cursor:pointer"
-       data-sk="← Späť" data-en="← Back">← Späť</a>
-    <span class="badge badge-blue">RS485</span>
-    <span class="badge badge-amber">mmH₂O</span>
-    <div class="lang-switcher">
-      <button class="lang-btn" id="btn-sk" onclick="setLang('sk')">
-        <img src="img/flag_sk.svg" alt="SK"><span>SK</span>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="index.html" data-sk="← Späť" data-en="← Back">← Späť</a>
+      <a href="https://github.com/Orimslav/level_sensor" target="_blank" rel="noopener">GitHub</a>
+      <a class="nav-kofi" href="https://ko-fi.com/orimslav" target="_blank" rel="noopener">
+        <img src="img/kofi_icon.png" alt="Ko-fi">
+        <span data-sk="Podporte ma na Ko-fi" data-en="Support me on Ko-fi">Podporte ma na Ko-fi</span>
+      </a>
+    </div>
+    <div class="lang-sw">
+      <button class="lb" id="btn-sk" onclick="setLang('sk')" title="Slovenčina">
+        <img src="img/flag_sk.svg" alt="SK">
       </button>
-      <button class="lang-btn" id="btn-en" onclick="setLang('en')">
-        <img src="img/flag_en.svg" alt="EN"><span>EN</span>
+      <button class="lb" id="btn-en" onclick="setLang('en')" title="English">
+        <img src="img/flag_en.svg" alt="EN">
       </button>
     </div>
   </div>
-</header>
+</div>
+</nav>
 
 <div class="container">
 
@@ -471,7 +463,7 @@ footer {
         <line id="d_minLine" x1="40" x2="200" y1="262" y2="262" stroke="#EF9F27" stroke-width="1" stroke-dasharray="3 2" opacity="0.8"/>
 
         <!-- Tank label -->
-        <text x="120" y="66" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#7a7a9a" text-anchor="middle">Horizontal boiler / tank</text>
+        <text x="120" y="66" font-family="DM Sans,sans-serif" font-size="10" font-weight="600" fill="#7a7a9a" text-anchor="middle">Horizontal boiler / tank</text>
 
         <!-- MY-136 sensor -->
         <rect x="84" y="222" width="72" height="20" rx="4" fill="#3C3489" stroke="#7F77DD" stroke-width="1"/>
@@ -517,7 +509,7 @@ footer {
         <circle class="dEth" cx="334" cy="108" r="2.5" fill="#1D9E75"/>
         <circle cx="342" cy="108" r="2.5" fill="#EF9F27" opacity="0.8"/>
         <!-- Module label -->
-        <text x="356" y="158" font-family="Inter,sans-serif" font-size="8" font-weight="600" fill="#9FE1CB" text-anchor="middle" dominant-baseline="central">Waveshare</text>
+        <text x="356" y="158" font-family="DM Sans,sans-serif" font-size="8" font-weight="600" fill="#9FE1CB" text-anchor="middle" dominant-baseline="central">Waveshare</text>
         <text x="356" y="170" font-family="JetBrains Mono,monospace" font-size="7" fill="#5DCAA5" text-anchor="middle" dominant-baseline="central">RS485 to WiFi/ETH</text>
 
         <!-- Ethernet wire: converter → PC -->
@@ -536,7 +528,7 @@ footer {
         <text id="d_pcPct" x="260" y="258" font-family="JetBrains Mono,monospace" font-size="8" fill="#5DCAA5" text-anchor="middle" dominant-baseline="central">50.0 %</text>
         <rect x="254" y="272" width="12" height="8" rx="1" fill="#185FA5"/>
         <rect x="242" y="279" width="36" height="4" rx="2" fill="#185FA5"/>
-        <text x="260" y="298" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#7a7a9a" text-anchor="middle">PC monitor</text>
+        <text x="260" y="298" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#7a7a9a" text-anchor="middle">PC monitor</text>
 
         <!-- Level text in tank -->
         <text id="d_lvlTxt" x="120" y="200" font-family="JetBrains Mono,monospace" font-size="11" font-weight="600" fill="#E1F5EE" text-anchor="middle" dominant-baseline="central">1000 mm</text>

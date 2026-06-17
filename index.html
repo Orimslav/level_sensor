@@ -3,125 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MY-136 Level / Pressure Sensor Monitor — Modbus TCP</title>
+<meta name="theme-color" content="#0d0d12">
 <link rel="icon" type="image/x-icon" href="img/logo.ico">
 <link rel="shortcut icon" type="image/x-icon" href="img/logo.ico">
 <link rel="apple-touch-icon" href="img/logo.ico">
+<title>MY-136 Level / Pressure Sensor Monitor — Modbus TCP</title>
+<meta name="description" content="Desktop application for monitoring the MY-136 pressure / level sensor via Modbus TCP (RS485 → Ethernet converter)">
+
+<!-- Open Graph / social share -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="MY-136 Level / Pressure Sensor Monitor — Modbus TCP">
+<meta property="og:description" content="Desktop app for monitoring the MY-136 pressure / level sensor via Modbus TCP. Tank visualization, MIN/MAX alarms, history, e-mail alerts.">
+<meta property="og:image" content="https://orimslav.github.io/level_sensor/img/level_sensor1.gif">
+<meta property="og:url" content="https://orimslav.github.io/level_sensor/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MY-136 Level / Pressure Sensor Monitor — Modbus TCP">
+<meta name="twitter:description" content="Desktop app for monitoring the MY-136 pressure / level sensor via Modbus TCP.">
+<meta name="twitter:image" content="https://orimslav.github.io/level_sensor/img/level_sensor1.gif">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:#111;display:flex;flex-direction:column;align-items:center;padding:0;font-family:'Segoe UI',sans-serif;color:#ccc;min-height:100vh;}
+:root{
+  --bg:#0d0d12;--bg2:#13131a;--bg3:#1a1a24;
+  --border:rgba(255,255,255,0.07);
+  --bh:rgba(29,158,117,0.4);
+  --teal:#1D9E75;--teal2:#0F6E56;--teal3:#9FE1CB;
+  --text:#e8e8f0;--muted:#9090b8;
+  --tbc:#9FE1CB;--tbb:rgba(29,158,117,0.12);
+  --green:#4ade80;--kofi:#29ABE0;
+  --amber:#EF9F27;--amber2:#BA7517;--blue3:#85B7EB;--blue2:#185FA5;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(29,158,117,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(29,158,117,0.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 40px;}
 
-  /* Top bar */
-  .topbar{width:100%;background:#1e1e2e;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between;padding:10px 24px;}
-  .topbar-logo{display:flex;align-items:center;gap:10px;}
-  .topbar-logo img{height:32px;width:auto;}
-  .topbar-logo span{font-size:12px;color:#666;font-family:monospace;}
-  .lang-switcher{display:flex;gap:6px;}
-  .lang-btn{background:none;border:1.5px solid #444;border-radius:4px;cursor:pointer;padding:3px 6px;display:flex;align-items:center;gap:5px;font-size:11px;color:#888;transition:border-color 0.15s,color 0.15s;}
-  .lang-btn:hover{border-color:#777;color:#ccc;}
-  .lang-btn.active{border-color:#1D9E75;color:#ccc;}
-  .lang-btn img{width:20px;height:14px;object-fit:cover;border-radius:2px;}
+/* Nav */
+nav{border-bottom:1px solid var(--border);padding:13px 0;position:sticky;top:0;background:rgba(13,13,18,0.95);backdrop-filter:blur(14px);z-index:100;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:11px;text-decoration:none;}
+.nav-logo img.logo{height:38px;width:auto;object-fit:contain;}
+.nav-brand{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;letter-spacing:0.06em;color:var(--muted);}
+.nav-right{display:flex;align-items:center;gap:18px;}
+.nav-links{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-kofi{display:inline-flex;align-items:center;gap:6px;color:var(--kofi)!important;font-weight:600;border:1px solid rgba(41,171,224,0.35);border-radius:6px;padding:5px 11px;transition:border-color .2s,background .2s;}
+.nav-kofi:hover{border-color:var(--kofi);background:rgba(41,171,224,0.08);color:var(--kofi)!important;}
+.nav-kofi img{height:16px;width:auto;}
+.lang-sw{display:flex;gap:4px;align-items:center;}
+.lb{background:transparent;border:1px solid var(--border);border-radius:5px;padding:3px 5px;cursor:pointer;transition:border-color .18s,transform .15s,opacity .18s;opacity:0.55;display:flex;align-items:center;}
+.lb:hover{opacity:0.85;border-color:rgba(255,255,255,0.2);}
+.lb.active{opacity:1;border-color:var(--teal);transform:scale(1.08);}
+.lb img{width:24px;height:16px;object-fit:cover;border-radius:2px;display:block;}
 
-  /* Main content */
-  .main{width:100%;max-width:760px;padding:32px 20px;}
-  .header{text-align:center;margin-bottom:32px;}
-  .header h1{font-size:22px;color:#e0e0e0;font-weight:600;margin-bottom:8px;}
-  .header p{font-size:13px;color:#888;line-height:1.6;}
-  .header .badge{display:inline-block;background:#2a2a3e;border:1px solid #444;border-radius:4px;padding:2px 8px;font-size:11px;color:#aaa;font-family:monospace;margin-top:6px;}
+/* Hero */
+.hero{padding:60px 0 36px;}
+.hero-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--teal);}
+h1{font-size:clamp(30px,5vw,54px);font-weight:600;line-height:1.08;letter-spacing:-0.03em;margin-bottom:14px;font-family:'JetBrains Mono',monospace;background:linear-gradient(90deg,#cdeee2 0%,#1D9E75 50%,#0F6E56 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:16px;color:var(--muted);font-weight:300;margin-bottom:22px;max-width:640px;}
+.hero-sub em{font-style:normal;color:var(--teal3);}
+.badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--bg2);border:1px solid var(--border);padding:4px 10px;border-radius:4px;}
 
-  .card{background:#1e1e2e;border:1.5px solid #555;border-radius:8px;padding:24px;margin-bottom:20px;}
-  .card-title{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #333;}
+/* Preview gif — full content width */
+.preview{display:block;width:100%;height:auto;aspect-ratio:755/570;max-width:680px;margin:0 auto 56px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);}
 
-  .btn-row{display:flex;gap:12px;flex-wrap:wrap;}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:5px;font-size:13px;font-weight:500;text-decoration:none;border:none;cursor:pointer;transition:opacity 0.15s;}
-  .btn:hover{opacity:0.82;}
-  .btn-primary{background:#2980b9;color:#fff;}
-  .btn-secondary{background:#2a2a3e;border:1px solid #555;color:#ccc;}
-  .btn-demo{background:#1D9E75;color:#fff;}
-  .btn svg{flex-shrink:0;}
+/* Section heading */
+.sh{display:flex;align-items:baseline;gap:16px;margin-bottom:20px;}
+.st{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+.sl{flex:1;height:1px;background:var(--border);}
 
-  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .info-item label{display:block;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
-  .info-item span{font-size:12px;color:#bbb;font-family:monospace;}
+/* Buttons */
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:56px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;text-decoration:none;cursor:pointer;transition:opacity .2s,transform .15s,border-color .2s,color .2s;}
+.btn svg{flex-shrink:0;}
+.btn-p{background:var(--teal);color:#0d0d12;border:none;}
+.btn-p:hover{opacity:.88;transform:translateY(-1px);}
+.btn-g{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-g:hover{border-color:var(--bh);color:var(--text);transform:translateY(-1px);}
+.btn-demo{background:var(--teal2);color:#fff;border:none;}
+.btn-demo:hover{opacity:.88;transform:translateY(-1px);}
 
-  .table{width:100%;border-collapse:collapse;font-size:12px;}
-  .table th{text-align:left;padding:5px 8px;color:#666;font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #333;}
-  .table td{padding:5px 8px;color:#bbb;border-bottom:1px solid #2a2a3e;font-family:monospace;}
-  .table tr:last-child td{border-bottom:none;}
-  .tag{display:inline-block;background:#252535;border:1px solid #444;border-radius:3px;padding:1px 6px;font-size:10px;color:#aaa;}
-  .tag-blue{border-color:#185FA5;color:#85B7EB;background:#0a1e35;}
-  .tag-green{border-color:#0F6E56;color:#9FE1CB;background:#0a2e22;}
-  .tag-amber{border-color:#BA7517;color:#EF9F27;background:#2a1e08;}
-  .rw{color:#EF9F27;}
-  .ro{color:#7a7a9a;}
+/* Two-column card grid */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:56px;}
+@media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:24px 22px;}
+.card-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 
-  .footer{text-align:center;color:#444;font-size:11px;margin-top:24px;font-family:monospace;}
-  .footer a{color:#555;text-decoration:none;}
-  .footer a:hover{color:#888;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.info-item label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;font-family:'JetBrains Mono',monospace;}
+.info-item span{font-size:13px;color:var(--text);font-family:'JetBrains Mono',monospace;}
 
-  .dl-table{width:100%;border-collapse:collapse;margin-bottom:14px;}
-  .dl-table th{text-align:left;padding:5px 8px;color:#555;font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #2a2a3e;}
-  .dl-table td{padding:7px 8px;border-bottom:1px solid #222;vertical-align:middle;}
-  .dl-table tr:last-child td{border-bottom:none;}
-  .dl-os{display:flex;align-items:center;gap:7px;font-size:13px;color:#ccc;}
-  .dl-os svg{flex-shrink:0;opacity:0.7;}
-  .dl-arch{font-size:11px;color:#666;font-family:monospace;}
-  .dl-note{font-size:11px;color:#666;}
-  .btn-dl{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:4px;font-size:12px;font-weight:500;text-decoration:none;background:#1a2a3a;border:1px solid #2980b9;color:#85B7EB;transition:opacity 0.15s;white-space:nowrap;}
-  .btn-dl:hover{opacity:0.78;}
+.table{width:100%;border-collapse:collapse;font-size:12px;}
+.table th{text-align:left;padding:6px 8px;color:var(--muted);font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;}
+.table td{padding:7px 8px;color:var(--text);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;vertical-align:middle;}
+.table tr:last-child td{border-bottom:none;}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tbc);background:var(--tbb);border:1px solid rgba(29,158,117,0.2);padding:2px 7px;border-radius:3px;}
+.tag-blue{color:var(--blue3);background:#0a1e35;border-color:var(--blue2);}
+.tag-green{color:var(--teal3);background:#0a2e22;border-color:var(--teal2);}
+.rw{color:var(--amber);}
+.ro{color:var(--muted);}
 
-  .mac-note{background:#1e1a0a;border:1px solid #BA7517;border-radius:6px;padding:12px 14px;font-size:12px;color:#c8a44a;line-height:1.6;margin-top:4px;}
-  .mac-note strong{color:#EF9F27;}
-  .mac-note code{background:#2a1e08;border-radius:3px;padding:1px 5px;font-family:monospace;font-size:11px;color:#e8c06a;}
+/* Download table */
+.dl-os{display:flex;align-items:center;gap:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);}
+.dl-os svg{flex-shrink:0;opacity:0.75;}
+.dl-os .sub{font-size:11px;color:var(--muted);}
+.btn-dl{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;text-decoration:none;background:var(--tbb);border:1px solid rgba(29,158,117,0.3);color:var(--teal3);transition:border-color .2s,background .2s,transform .15s;white-space:nowrap;}
+.btn-dl:hover{border-color:var(--teal);background:rgba(29,158,117,0.18);transform:translateY(-1px);}
 
-  @media(max-width:520px){
-    .info-grid{grid-template-columns:1fr;}
-    .btn-row{flex-direction:column;}
-    .btn{justify-content:center;}
-    .topbar{padding:10px 16px;}
-    .dl-arch,.dl-note{display:none;}
-  }
+.mac-note{background:rgba(186,117,23,0.07);border:1px solid var(--amber2);border-radius:8px;padding:13px 15px;font-size:12px;color:#d6b266;line-height:1.7;margin-top:14px;}
+.mac-note strong{color:var(--amber);}
+.mac-note code{background:rgba(186,117,23,0.15);border-radius:3px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e8c06a;}
+
+/* Feature list */
+.feat-list{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.feat-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text);line-height:1.5;}
+.feat-list svg{flex-shrink:0;margin-top:3px;color:var(--green);}
+
+/* Quick start steps */
+.steps{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:14px;}
+.steps li{display:flex;align-items:flex-start;gap:12px;font-size:13px;color:var(--text);line-height:1.5;}
+.steps li::before{counter-increment:step;content:counter(step);flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--tbb);border:1px solid rgba(29,158,117,0.35);color:var(--teal3);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.steps code{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal3);background:var(--tbb);padding:1px 6px;border-radius:3px;}
+
+.note{font-size:12px;color:var(--muted);line-height:1.65;margin-top:14px;}
+.note strong{color:var(--amber);}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;margin-top:8px;}
+.foot-support{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.foot-support a{color:var(--kofi);font-weight:600;text-decoration:none;}
+.foot-support a:hover{text-decoration:underline;}
+.foot-links{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.foot-links a{color:var(--muted);text-decoration:none;transition:color .2s;}
+.foot-links a:hover{color:var(--teal);}
+
+@media(max-width:600px){
+  .wrap{padding:0 18px;}
+  .nav-inner{flex-wrap:wrap;gap:9px;}
+  .nav-right{width:100%;justify-content:space-between;gap:12px;}
+  .info-grid{grid-template-columns:1fr;}
+  .btn-row{flex-direction:column;}
+  .btn{justify-content:center;}
+  .hero{padding:40px 0 28px;}
+  .dl-os .sub{display:none;}
+}
+
+/* Keyboard accessibility — visible focus ring */
+a:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px;}
+
+@keyframes fU{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.hero-label{animation:fU .45s ease both;}
+h1{animation:fU .45s .08s ease both;}
+.hero-sub{animation:fU .45s .16s ease both;}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-logo">
-    <a href="https://orimslav.github.io/" target="_blank" rel="noopener" title="Orimslav">
-      <img src="img/orimslav_logo.png" alt="Orimslav logo" style="cursor:pointer;">
-    </a>
-    <span>level_sensor</span>
-  </div>
-  <div class="lang-switcher">
-    <button class="lang-btn" id="btn-sk" onclick="setLang('sk')">
-      <img src="img/flag_sk.svg" alt="SK"><span>SK</span>
-    </button>
-    <button class="lang-btn" id="btn-en" onclick="setLang('en')">
-      <img src="img/flag_en.svg" alt="EN"><span>EN</span>
-    </button>
+<nav>
+<div class="wrap nav-inner">
+  <a class="nav-logo" href="https://orimslav.github.io" target="_blank" rel="noopener">
+    <img class="logo" src="img/orimslav_logo.png" alt="Orimslav logo">
+    <span class="nav-brand">level_sensor</span>
+  </a>
+  <div class="nav-right">
+    <div class="nav-links">
+      <a href="https://github.com/Orimslav/level_sensor" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://orimslav.github.io" target="_blank" rel="noopener">Orimslav</a>
+      <a class="nav-kofi" href="https://ko-fi.com/orimslav" target="_blank" rel="noopener">
+        <img src="img/kofi_icon.png" alt="Ko-fi">
+        <span data-sk="Podporte ma na Ko-fi" data-en="Support me on Ko-fi">Podporte ma na Ko-fi</span>
+      </a>
+    </div>
+    <div class="lang-sw">
+      <button class="lb" id="btn-sk" onclick="setLang('sk')" title="Slovenčina">
+        <img src="img/flag_sk.svg" alt="SK">
+      </button>
+      <button class="lb" id="btn-en" onclick="setLang('en')" title="English">
+        <img src="img/flag_en.svg" alt="EN">
+      </button>
+    </div>
   </div>
 </div>
+</nav>
 
-<div class="main">
-  <div class="header">
+<div class="wrap">
+
+  <section class="hero">
+    <div class="hero-label" data-sk="MY-136 · Snímač tlaku / hladiny · Modbus TCP"
+         data-en="MY-136 · Pressure / Level Sensor · Modbus TCP">MY-136 · Snímač tlaku / hladiny · Modbus TCP</div>
     <h1 data-sk="MY-136 Monitor hladiny / tlaku"
-        data-en="MY-136 Level / Pressure Sensor Monitor">MY-136 Monitor hladiny / tlaku</h1>
-    <p data-sk="Desktopová aplikácia na monitorovanie snímača tlaku / hladiny MY-136<br>cez Modbus TCP (RS485 snímač → prevodník RS485-to-Ethernet)"
-       data-en="Desktop application for monitoring the MY-136 pressure / level sensor<br>via Modbus TCP (RS485 sensor → RS485-to-Ethernet converter)">
-      Desktopová aplikácia na monitorovanie snímača tlaku / hladiny MY-136<br>cez Modbus TCP (RS485 snímač → prevodník RS485-to-Ethernet)
+        data-en="MY-136 Level / Pressure Monitor">MY-136 Monitor hladiny / tlaku</h1>
+    <p class="hero-sub"
+       data-sk="Desktopová aplikácia na monitorovanie snímača tlaku / hladiny <em>MY-136</em> cez Modbus TCP (RS485 snímač → prevodník RS485-to-Ethernet). Vizualizácia nádrže, MIN/MAX alarmy, história, e-mailové notifikácie."
+       data-en="Desktop application for monitoring the <em>MY-136</em> pressure / level sensor via Modbus TCP (RS485 sensor → RS485-to-Ethernet converter). Tank visualization, MIN/MAX alarms, history, e-mail alerts.">
+      Desktopová aplikácia na monitorovanie snímača tlaku / hladiny <em>MY-136</em> cez Modbus TCP (RS485 snímač → prevodník RS485-to-Ethernet). Vizualizácia nádrže, MIN/MAX alarmy, história, e-mailové notifikácie.
     </p>
     <span class="badge">Python 3 · pymodbus &gt;= 3.6.0 · tkinter · pystray</span>
-  </div>
+  </section>
+
+  <img class="preview" src="img/level_sensor1.gif" width="755" height="570" decoding="async"
+       alt="Animácia aplikácie MY-136 Level Sensor Monitor — meniaca sa hladina, nádrž a alarmy">
 
   <!-- Download -->
-  <div class="card">
-    <div class="card-title" data-sk="Stiahnutie" data-en="Download">Stiahnutie</div>
-
-    <table class="dl-table">
+  <div class="sh">
+    <span class="st" data-sk="Stiahnutie" data-en="Download">Stiahnutie</span>
+    <div class="sl"></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <table class="table">
       <thead>
         <tr>
           <th data-sk="Platforma" data-en="Platform">Platforma</th>
-          <th class="dl-arch" data-sk="Arch" data-en="Arch">Arch</th>
+          <th data-sk="Arch" data-en="Arch">Arch</th>
           <th data-sk="Súbor" data-en="File">Súbor</th>
           <th></th>
         </tr>
@@ -132,8 +234,8 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="#85B7EB"><path d="M0 2.5A1.5 1.5 0 011.5 1h13A1.5 1.5 0 0116 2.5v8a1.5 1.5 0 01-1.5 1.5H9v1h1a.5.5 0 010 1H6a.5.5 0 010-1h1v-1H1.5A1.5 1.5 0 010 10.5v-8zm1.5-.5a.5.5 0 00-.5.5v8a.5.5 0 00.5.5h13a.5.5 0 00.5-.5v-8a.5.5 0 00-.5-.5h-13z"/></svg>
             Windows
           </span></td>
-          <td class="dl-arch">x86-64</td>
-          <td><span class="dl-note">LevelSensorMonitor.exe</span></td>
+          <td>x86-64</td>
+          <td>LevelSensorMonitor.exe</td>
           <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor.exe">
             ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
           </a></td>
@@ -143,8 +245,8 @@
             <svg width="14" height="14" viewBox="0 0 16 16" fill="#9FE1CB"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/><path d="M8 3.5a.5.5 0 01.5.5v3.793l2.146 2.147a.5.5 0 01-.707.707l-2.354-2.354A.5.5 0 017.5 8V4a.5.5 0 01.5-.5z"/></svg>
             Linux
           </span></td>
-          <td class="dl-arch">x86-64</td>
-          <td><span class="dl-note">LevelSensorMonitor-linux-x64</span></td>
+          <td>x86-64</td>
+          <td>LevelSensorMonitor-linux-x64</td>
           <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-linux-x64">
             ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
           </a></td>
@@ -152,23 +254,21 @@
         <tr>
           <td><span class="dl-os">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="#9FE1CB"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/><path d="M8 3.5a.5.5 0 01.5.5v3.793l2.146 2.147a.5.5 0 01-.707.707l-2.354-2.354A.5.5 0 017.5 8V4a.5.5 0 01.5-.5z"/></svg>
-            Linux
-            <span style="font-size:11px;color:#555;margin-left:2px;" data-sk="(Raspberry Pi)" data-en="(Raspberry Pi)">(Raspberry Pi)</span>
+            Linux <span class="sub" data-sk="(Raspberry Pi)" data-en="(Raspberry Pi)">(Raspberry Pi)</span>
           </span></td>
-          <td class="dl-arch">ARM64</td>
-          <td><span class="dl-note">LevelSensorMonitor-linux-arm64</span></td>
+          <td>ARM64</td>
+          <td>LevelSensorMonitor-linux-arm64</td>
           <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-linux-arm64">
             ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
           </a></td>
         </tr>
         <tr>
           <td><span class="dl-os">
-            <svg width="14" height="14" viewBox="0 0 814 1000" fill="#c0c0c0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46 790.8 0 663 0 541.8c0-207.9 134.4-318 266.5-318 69.4 0 127.1 45.5 170.9 45.5 41.6 0 106.7-48 186.3-48 30.1 0 110.9 2.6 168.3 87.4zm-137.5-174.7c32.4-38.1 55.7-91.1 55.7-144.1 0-7.4-.6-14.9-1.9-21.3-52.6 2-115.2 34.8-152.8 75.4-29 32.4-56.9 85.4-56.9 139.1 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.3 1.3 13.6 1.3 47.4 0 105.1-31.2 140.4-69.6z"/></svg>
-            macOS
-            <span style="font-size:11px;color:#555;margin-left:2px;">Apple Silicon</span>
+            <svg width="13" height="13" viewBox="0 0 814 1000" fill="#c0c0c0"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-37.5-155.5-127.4C46 790.8 0 663 0 541.8c0-207.9 134.4-318 266.5-318 69.4 0 127.1 45.5 170.9 45.5 41.6 0 106.7-48 186.3-48 30.1 0 110.9 2.6 168.3 87.4zm-137.5-174.7c32.4-38.1 55.7-91.1 55.7-144.1 0-7.4-.6-14.9-1.9-21.3-52.6 2-115.2 34.8-152.8 75.4-29 32.4-56.9 85.4-56.9 139.1 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.3 1.3 13.6 1.3 47.4 0 105.1-31.2 140.4-69.6z"/></svg>
+            macOS <span class="sub">Apple Silicon</span>
           </span></td>
-          <td class="dl-arch">ARM64</td>
-          <td><span class="dl-note">LevelSensorMonitor-mac-arm64</span></td>
+          <td>ARM64</td>
+          <td>LevelSensorMonitor-mac-arm64</td>
           <td><a class="btn-dl" href="https://github.com/Orimslav/level_sensor/releases/latest/download/LevelSensorMonitor-mac-arm64">
             ↓ <span data-sk="Stiahnuť" data-en="Download">Stiahnuť</span>
           </a></td>
@@ -176,7 +276,6 @@
       </tbody>
     </table>
 
-    <!-- Mac note -->
     <div class="mac-note">
       <strong data-sk="macOS — prvé spustenie:" data-en="macOS — first launch:">macOS — prvé spustenie:</strong>
       <span data-sk=" binárka nie je podpísaná Apple certifikátom, treba odstrániť karanténu:"
@@ -187,115 +286,149 @@
       <code>chmod +x LevelSensorMonitor-mac-*</code><br>
       <code>./LevelSensorMonitor-mac-*</code>
     </div>
+  </div>
 
-    <div class="btn-row" style="margin-top:14px;">
-      <a class="btn btn-secondary" href="https://github.com/Orimslav/level_sensor/releases" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.47 10.78a.75.75 0 001.06 0l3.75-3.75a.75.75 0 00-1.06-1.06L8.75 8.44V2a.75.75 0 00-1.5 0v6.44L4.78 5.97a.75.75 0 00-1.06 1.06l3.75 3.75zM2 12.75a.75.75 0 000 1.5h12a.75.75 0 000-1.5H2z"/></svg>
-        <span data-sk="Všetky verzie (GitHub Releases)" data-en="All versions (GitHub Releases)">Všetky verzie (GitHub Releases)</span>
-      </a>
-      <a class="btn btn-secondary" href="https://github.com/Orimslav/level_sensor/archive/refs/heads/main.zip">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M9.75 1.5H3.5A1.5 1.5 0 002 3v10a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0014 13V5.75L9.75 1.5zm0 1.5L12.5 5.75H9.75V3zM3.5 13V3h4.75v3.5A.75.75 0 009 7.25h3.5L12.5 13H3.5z"/></svg>
-        <span data-sk="Zdrojový kód (.zip)" data-en="Source code (.zip)">Zdrojový kód (.zip)</span>
-      </a>
-      <a class="btn btn-demo" href="level_sensor_interactive_demo.html">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A1.5 1.5 0 013.5 1h9A1.5 1.5 0 0114 2.5v11a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 13.5V2.5zm1.5 0v11h9V2.5h-9zM6 5.25a.75.75 0 011.28-.53l2.5 2.5a.75.75 0 010 1.06l-2.5 2.5a.75.75 0 01-1.28-.53V5.25z"/></svg>
-        <span data-sk="Interaktívne demo" data-en="Interactive demo">Interaktívne demo</span>
-      </a>
+  <div class="btn-row">
+    <a class="btn btn-p" href="https://github.com/Orimslav/level_sensor/releases/latest" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.47 10.78a.75.75 0 001.06 0l3.75-3.75a.75.75 0 00-1.06-1.06L8.75 8.44V2a.75.75 0 00-1.5 0v6.44L4.78 5.97a.75.75 0 00-1.06 1.06l3.75 3.75zM2 12.75a.75.75 0 000 1.5h12a.75.75 0 000-1.5H2z"/></svg>
+      <span data-sk="Najnovšia verzia (Releases)" data-en="Latest release (Releases)">Najnovšia verzia (Releases)</span>
+    </a>
+    <a class="btn btn-g" href="https://github.com/Orimslav/level_sensor/archive/refs/heads/main.zip">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M9.75 1.5H3.5A1.5 1.5 0 002 3v10a1.5 1.5 0 001.5 1.5h9A1.5 1.5 0 0014 13V5.75L9.75 1.5zm0 1.5L12.5 5.75H9.75V3zM3.5 13V3h4.75v3.5A.75.75 0 009 7.25h3.5L12.5 13H3.5z"/></svg>
+      <span data-sk="Zdrojový kód (.zip)" data-en="Source code (.zip)">Zdrojový kód (.zip)</span>
+    </a>
+    <a class="btn btn-demo" href="level_sensor_interactive_demo.html">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A1.5 1.5 0 013.5 1h9A1.5 1.5 0 0114 2.5v11a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 13.5V2.5zm1.5 0v11h9V2.5h-9zM6 5.25a.75.75 0 011.28-.53l2.5 2.5a.75.75 0 010 1.06l-2.5 2.5a.75.75 0 01-1.28-.53V5.25z"/></svg>
+      <span data-sk="Interaktívne demo" data-en="Interactive demo">Interaktívne demo</span>
+    </a>
+  </div>
+
+  <!-- Features + Quick start -->
+  <div class="sh">
+    <span class="st" data-sk="Funkcie" data-en="Features">Funkcie</span>
+    <div class="sl"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title" data-sk="Čo aplikácia robí" data-en="What the app does">Čo aplikácia robí</div>
+      <ul class="feat-list">
+        <li>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06l2.72 2.72 6.72-6.72a.75.75 0 011.06 0z"/></svg>
+          <span data-sk="Zapamätá si poslednú IP a port (uložené vedľa aplikácie)" data-en="Remembers the last IP &amp; port (stored next to the app)">Zapamätá si poslednú IP a port (uložené vedľa aplikácie)</span>
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06l2.72 2.72 6.72-6.72a.75.75 0 011.06 0z"/></svg>
+          <span data-sk="Stabilné čítanie cez jedno I/O vlákno; automatické zotavenie po výpadku — čistý reconnect, indikátor sa sám vráti na zelenú" data-en="Stable reading via a single I/O thread; automatic recovery after an outage — clean reconnect, status returns to green on its own">Stabilné čítanie cez jedno I/O vlákno; automatické zotavenie po výpadku — čistý reconnect, indikátor sa sám vráti na zelenú</span>
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06l2.72 2.72 6.72-6.72a.75.75 0 011.06 0z"/></svg>
+          <span data-sk="Vizualizácia nádrže s MIN/MAX alarmami a prepínačom SK/EN" data-en="Tank visualization with MIN/MAX alarms and SK/EN switch">Vizualizácia nádrže s MIN/MAX alarmami a prepínačom SK/EN</span>
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06l2.72 2.72 6.72-6.72a.75.75 0 011.06 0z"/></svg>
+          <span data-sk="História hladiny — graf s voliteľným rozsahom, priebežný záznam a export do CSV; hover zobrazí dátum, čas a hodnotu" data-en="Level history — graph with selectable range, continuous logging &amp; CSV export; hover shows date, time and value">História hladiny — graf s voliteľným rozsahom, priebežný záznam a export do CSV; hover zobrazí dátum, čas a hodnotu</span>
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06l2.72 2.72 6.72-6.72a.75.75 0 011.06 0z"/></svg>
+          <span data-sk="E-mailové notifikácie — pri výpadku komunikácie &gt; 1 min a pri prekročení MIN/MAX rozsahu (vrátane obnovenia)" data-en="E-mail alerts — on communication outage &gt; 1 min and on MIN/MAX range breach (including recovery)">E-mailové notifikácie — pri výpadku komunikácie &gt; 1 min a pri prekročení MIN/MAX rozsahu (vrátane obnovenia)</span>
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06l2.72 2.72 6.72-6.72a.75.75 0 011.06 0z"/></svg>
+          <span data-sk="Beh na pozadí cez systémovú tray ikonu (Zobraziť / Ukončiť)" data-en="Background operation via system tray icon (Show / Quit)">Beh na pozadí cez systémovú tray ikonu (Zobraziť / Ukončiť)</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title" data-sk="Rýchly štart" data-en="Quick start">Rýchly štart</div>
+      <ol class="steps">
+        <li data-sk="Stiahnite a spustite aplikáciu (.exe alebo <code>python level_sensor_monitor.py</code>)" data-en="Download and run the app (.exe or <code>python level_sensor_monitor.py</code>)">Stiahnite a spustite aplikáciu (.exe alebo <code>python level_sensor_monitor.py</code>)</li>
+        <li data-sk="Zadajte pripojenie: IP <code>192.168.1.1</code>, Port <code>502</code>, Slave ID <code>1</code>" data-en="Enter connection: IP <code>192.168.1.1</code>, Port <code>502</code>, Slave ID <code>1</code>">Zadajte pripojenie: IP <code>192.168.1.1</code>, Port <code>502</code>, Slave ID <code>1</code></li>
+        <li data-sk="Kliknite na <code>Pripojiť</code> — nameraná hodnota a nádrž sa začnú obnovovať" data-en="Click <code>Connect</code> — measured value and tank start refreshing">Kliknite na <code>Pripojiť</code> — nameraná hodnota a nádrž sa začnú obnovovať</li>
+        <li data-sk="Bez senzora? Spustite <code>python simulator.py --port 502</code> a pripojte sa na <code>127.0.0.1</code>" data-en="No sensor? Run <code>python simulator.py --port 502</code> and connect to <code>127.0.0.1</code>">Bez senzora? Spustite <code>python simulator.py --port 502</code> a pripojte sa na <code>127.0.0.1</code></li>
+      </ol>
     </div>
   </div>
 
-  <!-- Features -->
-  <div class="card">
-    <div class="card-title" data-sk="Funkcie" data-en="Features">Funkcie</div>
-    <ul style="margin:0;padding-left:20px;line-height:1.9;">
-      <li data-sk="Zapamätá si poslednú IP a port (uložené vedľa aplikácie)"
-          data-en="Remembers the last IP &amp; port (stored next to the app)">Zapamätá si poslednú IP a port (uložené vedľa aplikácie)</li>
-      <li data-sk="Stabilné čítanie cez jedno I/O vlákno (serializované Modbus transakcie); automatické zotavenie po výpadku — čistý reconnect socketu, indikátor sa sám vráti na zelenú"
-          data-en="Stable reading via a single I/O thread (serialized Modbus transactions); automatic recovery after an outage — clean socket reconnect, status returns to green on its own">Stabilné čítanie cez jedno I/O vlákno (serializované Modbus transakcie); automatické zotavenie po výpadku — čistý reconnect socketu, indikátor sa sám vráti na zelenú</li>
-      <li data-sk="Vizualizácia nádrže s MIN/MAX alarmami a prepínačom SK/EN"
-          data-en="Tank visualization with MIN/MAX alarms and SK/EN switch">Vizualizácia nádrže s MIN/MAX alarmami a prepínačom SK/EN</li>
-      <li data-sk="História hladiny — graf s voliteľným rozsahom, roztiahnuteľné okno, priebežný záznam a export do CSV; prejdením kurzorom po grafe sa zobrazí dátum, čas a hodnota najbližšieho bodu"
-          data-en="Level history — graph with selectable range, resizable window, continuous logging &amp; CSV export; hover the cursor over the graph to read the date, time and value of the nearest point">História hladiny — graf s voliteľným rozsahom, roztiahnuteľné okno, priebežný záznam a export do CSV; prejdením kurzorom po grafe sa zobrazí dátum, čas a hodnota najbližšieho bodu</li>
-      <li data-sk="Log spojenia s počítadlom výpadkov (ukladané do events.log)"
-          data-en="Connection log with outage counter (saved to events.log)">Log spojenia s počítadlom výpadkov (ukladané do events.log)</li>
-      <li data-sk="E-mailové notifikácie — pri výpadku komunikácie &gt; 1 min a pri prekročení MIN/MAX rozsahu (vrátane obnovenia)"
-          data-en="E-mail alerts — on communication outage &gt; 1 min and on MIN/MAX range breach (including recovery)">E-mailové notifikácie — pri výpadku komunikácie &gt; 1 min a pri prekročení MIN/MAX rozsahu (vrátane obnovenia)</li>
-      <li data-sk="Beh na pozadí cez systémovú tray ikonu (Zobraziť / Ukončiť)"
-          data-en="Background operation via system tray icon (Show / Quit)">Beh na pozadí cez systémovú tray ikonu (Zobraziť / Ukončiť)</li>
-    </ul>
+  <!-- Hardware + Simulator -->
+  <div class="sh">
+    <span class="st" data-sk="Špecifikácie" data-en="Specifications">Špecifikácie</span>
+    <div class="sl"></div>
   </div>
-
-  <!-- Hardware -->
-  <div class="card">
-    <div class="card-title" data-sk="Hardware" data-en="Hardware">Hardware</div>
-    <div class="info-grid">
-      <div class="info-item">
-        <label data-sk="Snímač" data-en="Sensor">Snímač</label>
-        <span>MY-136 Pressure / Level</span>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title" data-sk="Hardware" data-en="Hardware">Hardware</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label data-sk="Snímač" data-en="Sensor">Snímač</label>
+          <span>MY-136 Pressure / Level</span>
+        </div>
+        <div class="info-item">
+          <label data-sk="Prevodník" data-en="Converter">Prevodník</label>
+          <span>RS485 → Ethernet (TCP)</span>
+        </div>
+        <div class="info-item">
+          <label data-sk="Protokol" data-en="Protocol">Protokol</label>
+          <span>Modbus RTU → TCP</span>
+        </div>
+        <div class="info-item">
+          <label data-sk="Predvolená IP" data-en="Default IP">Predvolená IP</label>
+          <span>192.168.1.1</span>
+        </div>
+        <div class="info-item">
+          <label data-sk="Port / Slave ID" data-en="Port / Slave ID">Port / Slave ID</label>
+          <span>502 / 1</span>
+        </div>
+        <div class="info-item">
+          <label data-sk="Rozsah (mmH₂O)" data-en="Range (mmH₂O)">Rozsah (mmH₂O)</label>
+          <span>0 – 2000 mm</span>
+        </div>
       </div>
-      <div class="info-item">
-        <label data-sk="Prevodník" data-en="Converter">Prevodník</label>
-        <span>RS485 → Ethernet (TCP)</span>
-      </div>
-      <div class="info-item">
-        <label data-sk="Protokol" data-en="Protocol">Protokol</label>
-        <span>Modbus RTU → TCP</span>
-      </div>
-      <div class="info-item">
-        <label data-sk="Predvolená IP" data-en="Default IP">Predvolená IP</label>
-        <span>192.168.1.1</span>
-      </div>
-      <div class="info-item">
-        <label data-sk="Port / Slave ID" data-en="Port / Slave ID">Port / Slave ID</label>
-        <span>502 / 1</span>
-      </div>
-      <div class="info-item">
-        <label data-sk="Rozsah (mmH₂O)" data-en="Range (mmH₂O)">Rozsah (mmH₂O)</label>
-        <span>0 – 2000 mm</span>
-      </div>
+      <p class="note"
+         data-sk="<strong>Viac Modbus masterov</strong> (napr. SCADA/PLC) na tom istom snímači: prepni prevodník do režimu Modbus gateway / Multi-Host Polling, nie transparentný. V transparentnom režime sa transaction ID zrazia a aplikácia trvalo ukazuje „Chyba“. (USR-DR134: Working Mode → Modbus Multi Host Polling.)"
+         data-en="<strong>Multiple Modbus masters</strong> (e.g. SCADA/PLC) on the same sensor: set the converter to a Modbus gateway / Multi-Host Polling mode, not transparent. In transparent mode the transaction IDs collide and the app shows a permanent &quot;Error&quot;. (USR-DR134: Working Mode → Modbus Multi Host Polling.)">
+        <strong>Viac Modbus masterov</strong> (napr. SCADA/PLC) na tom istom snímači: prepni prevodník do režimu Modbus gateway / Multi-Host Polling, nie transparentný. V transparentnom režime sa transaction ID zrazia a aplikácia trvalo ukazuje „Chyba“. (USR-DR134: Working Mode → Modbus Multi Host Polling.)
+      </p>
     </div>
-    <p style="font-size:12px;color:#888;margin-top:12px;line-height:1.6;"
-       data-sk="Viac Modbus masterov (napr. SCADA/PLC) na tom istom snímači: prepni prevodník do režimu Modbus gateway / Multi-Host Polling, nie transparentný. V transparentnom režime sa transaction ID zrazia a aplikácia trvalo ukazuje „Chyba". (USR-DR134: Working Mode → Modbus Multi Host Polling.)"
-       data-en="Multiple Modbus masters (e.g. SCADA/PLC) on the same sensor: set the converter to a Modbus gateway / Multi-Host Polling mode, not transparent. In transparent mode the transaction IDs collide and the app shows a permanent &quot;Error&quot;. (USR-DR134: Working Mode → Modbus Multi Host Polling.)">
-      Viac Modbus masterov (napr. SCADA/PLC) na tom istom snímači: prepni prevodník do režimu Modbus gateway / Multi-Host Polling, nie transparentný. V transparentnom režime sa transaction ID zrazia a aplikácia trvalo ukazuje „Chyba". (USR-DR134: Working Mode → Modbus Multi Host Polling.)
-    </p>
-  </div>
 
-  <!-- Simulator -->
-  <div class="card">
-    <div class="card-title" data-sk="Simulátor (bez fyzického snímača)" data-en="Simulator (no physical sensor needed)">Simulátor (bez fyzického snímača)</div>
-    <p style="font-size:12px;color:#888;margin-bottom:10px;"
-       data-sk="Testovací Modbus TCP server emulujúci snímač MY-136."
-       data-en="Test Modbus TCP server emulating the MY-136 sensor.">
-      Testovací Modbus TCP server emulujúci snímač MY-136.
-    </p>
-    <table class="table">
-      <thead>
-        <tr>
-          <th data-sk="Príkaz" data-en="Command">Príkaz</th>
-          <th data-sk="Popis" data-en="Description">Popis</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>python simulator.py --port 502</td>
-          <td data-sk="štandardný Modbus port" data-en="standard Modbus port">štandardný Modbus port</td>
-        </tr>
-        <tr>
-          <td>python simulator.py --mode sine</td>
-          <td data-sk="plynulá sínus vlna 0↔2000 mm" data-en="smooth sine wave 0↔2000 mm">plynulá sínus vlna 0↔2000 mm</td>
-        </tr>
-        <tr>
-          <td>python simulator.py --speed 2.0</td>
-          <td data-sk="rýchlejšia animácia (násobiteľ rýchlosti)" data-en="faster animation (speed multiplier)">rýchlejšia animácia (násobiteľ rýchlosti)</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="card">
+      <div class="card-title" data-sk="Simulátor (bez fyzického snímača)" data-en="Simulator (no physical sensor needed)">Simulátor (bez fyzického snímača)</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;"
+         data-sk="Testovací Modbus TCP server emulujúci snímač MY-136."
+         data-en="Test Modbus TCP server emulating the MY-136 sensor.">
+        Testovací Modbus TCP server emulujúci snímač MY-136.
+      </p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th data-sk="Príkaz" data-en="Command">Príkaz</th>
+            <th data-sk="Popis" data-en="Description">Popis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>python simulator.py --port 502</td>
+            <td data-sk="štandardný Modbus port" data-en="standard Modbus port">štandardný Modbus port</td>
+          </tr>
+          <tr>
+            <td>python simulator.py --mode sine</td>
+            <td data-sk="plynulá sínus vlna 0↔2000 mm" data-en="smooth sine wave 0↔2000 mm">plynulá sínus vlna 0↔2000 mm</td>
+          </tr>
+          <tr>
+            <td>python simulator.py --speed 2.0</td>
+            <td data-sk="rýchlejšia animácia" data-en="faster animation">rýchlejšia animácia</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Modbus registers -->
-  <div class="card">
-    <div class="card-title" data-sk="Modbus registre (FC03 čítanie / FC06 zápis)" data-en="Modbus registers (FC03 read / FC06 write)">Modbus registre (FC03 čítanie / FC06 zápis)</div>
+  <div class="sh">
+    <span class="st" data-sk="Modbus registre (FC03 čítanie / FC06 zápis)" data-en="Modbus registers (FC03 read / FC06 write)">Modbus registre (FC03 čítanie / FC06 zápis)</span>
+    <div class="sl"></div>
+  </div>
+  <div class="card" style="margin-bottom:56px;">
     <table class="table">
       <thead>
         <tr>
@@ -346,12 +479,21 @@
     </table>
   </div>
 
-  <div class="footer">
-    <a href="https://github.com/Orimslav/level_sensor" target="_blank">github.com/Orimslav/level_sensor</a>
-    &nbsp;·&nbsp;
-    <a href="modbus_komunika__n___protokol_sn__ma__e_tlaku_my-136.pdf" target="_blank">MY-136 Modbus PDF</a>
-  </div>
 </div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-support">
+      <span data-sk="Páči sa vám? Podporte vývoj kávou ☕" data-en="Like it? Support the development with a coffee ☕">Páči sa vám? Podporte vývoj kávou ☕</span>
+      <a href="https://ko-fi.com/orimslav" target="_blank" rel="noopener">ko-fi.com/orimslav</a>
+    </div>
+    <div class="foot-links">
+      <a href="https://github.com/Orimslav/level_sensor" target="_blank" rel="noopener">github.com/Orimslav/level_sensor</a>
+      &nbsp;·&nbsp;
+      <a href="modbus_komunika__n___protokol_sn__ma__e_tlaku_my-136.pdf" target="_blank">MY-136 Modbus PDF</a>
+    </div>
+  </div>
+</footer>
 
 <script>
 function setLang(lang){
